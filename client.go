@@ -36,20 +36,21 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 	resp, err := c.client.Post(endpoint, "application/cbor", reader)
 	if err != nil {
 		return nil, err
+	} else if resp.StatusCode != 200{
+		fmt.Println(
+			"status:", resp.Status, "\n",
+			"StatusCode:", resp.StatusCode, "\n",
+			"Proto:", resp.Proto, "\n",
+			"ProtoMajor:", resp.ProtoMajor, "\n",
+			"ProtoMinor:", resp.ProtoMinor, "\n",
+			"Header:", resp.Header, "\n",
+			"Body:", resp.Body, "\n",
+			"ContentLength:", resp.ContentLength, "\n",
+			"TransferEncoding:", resp.TransferEncoding, "\n",
+			"Request:", resp.Request,
+		)
+		return nil,fmt.Errorf("post error: %v",resp.Status)
 	}
-
-	fmt.Println(
-		"status:", resp.Status, "\n",
-		"StatusCode:", resp.StatusCode, "\n",
-		"Proto:", resp.Proto, "\n",
-		"ProtoMajor:", resp.ProtoMajor, "\n",
-		"ProtoMinor:", resp.ProtoMinor, "\n",
-		"Header:", resp.Header, "\n",
-		"Body:", resp.Body, "\n",
-		"ContentLength:", resp.ContentLength, "\n",
-		"TransferEncoding:", resp.TransferEncoding, "\n",
-		"Request:", resp.Request,
-	)
 	return io.ReadAll(resp.Body)
 }
 
