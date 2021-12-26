@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
-	"path"
 )
 
 type Client struct {
 	client http.Client
-	config ClientConfig
+	host   string
 }
 
-func NewClient(cfg ClientConfig) Client {
+func NewClient(host string) Client {
 	return Client{
 		client: http.Client{},
-		config: cfg,
+		host: host,
 	}
 }
 
@@ -32,32 +30,32 @@ func (c *Client) Status() (Status, error) {
 }
 
 func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
-	buffer := bytes.NewBuffer(data)
-	endpoint := c.url("/api/v2/canister/" + canisterId + "/query")
-	contentType := "application/cbor"
-	resp, err := c.client.Post(endpoint, contentType, buffer)
+	reader := bytes.NewReader(data)
+	endpoint := c.host+"/api/v2/canister/" + canisterId + "/query"
+	fmt.Println("post url:", endpoint)
+	resp, err := c.client.Post(endpoint, "application/cbor", reader)
 	if err != nil {
 		return nil, err
 	}
 
 	fmt.Println(
-		"status:",resp.Status,"\n",
-			"StatusCode:",resp.StatusCode,"\n",
-			"Proto:",resp.Proto,"\n",
-			"ProtoMajor:",resp.ProtoMajor,"\n",
-			"ProtoMinor:",resp.ProtoMinor,"\n",
-			"Header:",resp.Header,"\n",
-			"Body:",resp.Body,"\n",
-			"ContentLength:",resp.ContentLength,"\n",
-			"TransferEncoding:",resp.TransferEncoding,"\n",
-			"Request:",resp.Request,
-		)
+		"status:", resp.Status, "\n",
+		"StatusCode:", resp.StatusCode, "\n",
+		"Proto:", resp.Proto, "\n",
+		"ProtoMajor:", resp.ProtoMajor, "\n",
+		"ProtoMinor:", resp.ProtoMinor, "\n",
+		"Header:", resp.Header, "\n",
+		"Body:", resp.Body, "\n",
+		"ContentLength:", resp.ContentLength, "\n",
+		"TransferEncoding:", resp.TransferEncoding, "\n",
+		"Request:", resp.Request,
+	)
 	return io.ReadAll(resp.Body)
 }
 
 func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestID, error) {
 	buffer := bytes.NewBuffer(data)
-	endpoint := c.url("/api/v2/canister/" + canisterId + "/call")
+	endpoint := c.host+"/api/v2/canister/" + canisterId + "/call"
 	contentType := "application/cbor"
 	_, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
@@ -68,7 +66,7 @@ func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestI
 
 func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 	buffer := bytes.NewBuffer(data)
-	endpoint := c.url("/api/v2/canister/" + canisterId + "/read_state")
+	endpoint := c.host+"/api/v2/canister/" + canisterId + "/read_state"
 	contentType := "application/cbor"
 	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
@@ -78,19 +76,20 @@ func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 }
 
 func (c Client) get(path string) ([]byte, error) {
-	resp, err := c.client.Get(c.url(path))
+	a:= c.host+path
+	resp, err := c.client.Get(a)
 	if err != nil {
 		return nil, err
 	}
 	return io.ReadAll(resp.Body)
 }
 
-func (c Client) url(p string) string {
-	url := c.config.Host
-	url.Path = path.Join(url.Path, p)
-	return url.String()
-}
-
-type ClientConfig struct {
-	Host *url.URL
-}
+//func (c Client) url(p string) string {
+//	url := c.config.Host
+//	url.Path = path.Join(url.Path, p)
+//	return url.String()
+//}
+//
+//type ClientConfig struct {
+//	Host *url.URL
+//}
