@@ -19,7 +19,6 @@ func TestAgent(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-
 	_, _, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
 	t.Log("errMsg:", errMsg, "err:", err)
 

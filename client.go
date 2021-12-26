@@ -15,7 +15,7 @@ type Client struct {
 func NewClient(host string) Client {
 	return Client{
 		client: http.Client{},
-		host: host,
+		host:   host,
 	}
 }
 
@@ -30,13 +30,13 @@ func (c *Client) Status() (Status, error) {
 }
 
 func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
-	reader := bytes.NewReader(data)
-	endpoint := c.host+"/api/v2/canister/" + canisterId + "/query"
+	buffer := bytes.NewBuffer(data)
+	endpoint := c.host + "/api/v2/canister/" + canisterId + "/query"
 	fmt.Println("post url:", endpoint)
-	resp, err := c.client.Post(endpoint, "application/cbor", reader)
+	resp, err := c.client.Post(endpoint, "application/cbor", buffer)
 	if err != nil {
 		return nil, err
-	} else if resp.StatusCode != 200{
+	} else if resp.StatusCode != 202 {
 		fmt.Println(
 			"status:", resp.Status, "\n",
 			"StatusCode:", resp.StatusCode, "\n",
@@ -49,14 +49,15 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 			"TransferEncoding:", resp.TransferEncoding, "\n",
 			"Request:", resp.Request,
 		)
-		return nil,fmt.Errorf("post error: %v",resp.Status)
+		return nil, fmt.Errorf("post error: %v", resp.Status)
 	}
+	defer resp.Body.Close()
 	return io.ReadAll(resp.Body)
 }
 
 func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestID, error) {
 	buffer := bytes.NewBuffer(data)
-	endpoint := c.host+"/api/v2/canister/" + canisterId + "/call"
+	endpoint := c.host + "/api/v2/canister/" + canisterId + "/call"
 	contentType := "application/cbor"
 	_, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
@@ -67,7 +68,7 @@ func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestI
 
 func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 	buffer := bytes.NewBuffer(data)
-	endpoint := c.host+"/api/v2/canister/" + canisterId + "/read_state"
+	endpoint := c.host + "/api/v2/canister/" + canisterId + "/read_state"
 	contentType := "application/cbor"
 	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
@@ -77,7 +78,7 @@ func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 }
 
 func (c Client) get(path string) ([]byte, error) {
-	a:= c.host+path
+	a := c.host + path
 	resp, err := c.client.Get(a)
 	if err != nil {
 		return nil, err
