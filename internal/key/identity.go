@@ -3,6 +3,7 @@ package identity
 import (
 	"crypto/sha256"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/dfinity/keysmith/codec"
 )
 
 func New(anonymous bool, pkBytes []byte) *Identity {
@@ -34,14 +35,14 @@ func (identity *Identity) Sign(m []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return sign.Serialize(), nil
+	return codec.EncodeECSig(sign), nil
 }
 
 func (identity *Identity) PubKeyBytes() []byte {
 	var senderPubKey []byte
 	if identity.Anonymous == false {
-		return identity.PubKey.SerializeUncompressed()
+		pkBytes, _ := codec.EncodeECPubKey(identity.PubKey)
+		return pkBytes
 	}
 	return senderPubKey
-
 }

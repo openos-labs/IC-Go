@@ -37,8 +37,7 @@ func (agent *Agent) Sender() *principal.Principal {
 	if agent.identity.Anonymous == true {
 		return &principal.AnonymousID
 	}
-	pub := agent.identity.PubKey
-	sender := principal.NewSelfAuthenticating(pub.SerializeUncompressed())
+	sender := principal.NewSelfAuthenticating(agent.identity.PubKeyBytes())
 	return &sender
 }
 
