@@ -35,8 +35,9 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 	fmt.Println("post url:", endpoint)
 	resp, err := c.client.Post(endpoint, "application/cbor", buffer)
 	if err != nil {
+		fmt.Println("error:",err)
 		return nil, err
-	} else if resp.StatusCode != 202 {
+	} else if resp.StatusCode != 200 {
 		fmt.Println(
 			"status:", resp.Status, "\n",
 			"StatusCode:", resp.StatusCode, "\n",

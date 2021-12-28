@@ -62,7 +62,7 @@ func EncodeRequestID(request map[string]interface{}) RequestID {
 			hashes = append(hashes,result)
 		case "sender":
 			typeKey := sha256.Sum256([]byte("sender"))
-			typeValue := sha256.Sum256(v.(principal.Principal))
+			typeValue := sha256.Sum256(v.([]byte))
 			result := append(typeKey[:],typeValue[:]...)
 			hashes = append(hashes,result)
 		case "nonce":
@@ -77,7 +77,7 @@ func EncodeRequestID(request map[string]interface{}) RequestID {
 			hashes = append(hashes,result)
 		case "canister_id":
 			typeKey := sha256.Sum256([]byte("canister_id"))
-			typeValue := sha256.Sum256(v.(principal.Principal))
+			typeValue := sha256.Sum256(v.([]byte))
 			result := append(typeKey[:],typeValue[:]...)
 			hashes = append(hashes,result)
 		case "method_name":

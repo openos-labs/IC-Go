@@ -4,48 +4,41 @@ import (
 	"encoding/hex"
 	"fmt"
 	"github.com/aviate-labs/agent-go/internal/key"
-	"github.com/aviate-labs/bip39"
 	"github.com/aviate-labs/candid-go/idl"
 	"github.com/aviate-labs/principal-go"
 	"github.com/fxamacker/cbor/v2"
-	"golang.org/x/crypto/sha3"
 	"time"
 )
 
 type Agent struct {
 	client        *Client
-	key           *key.Pairs
+	identity      *identity.Identity
 	ingressExpiry time.Duration
-	rootKey       []byte		//ICP root key
+	rootKey       []byte //ICP root key
 }
 
-func New() (*Agent,bip39.Mnemonic) {
+func New(anonymous bool, privKey string) *Agent {
 	c := NewClient("https://ic0.app")
 	//todo:是否需要从ic拉取rootKey信息
 	status, _ := c.Status()
-	e, _ := bip39.NewEntropy(128)
-	m, _ := bip39.English.NewMnemonic(e)
-	n, _ := key.New(m, "")
-	priKey, pubKey, _ := key.Keys(n)
-	pair := &key.Pairs{
-		PriKey: priKey,
-		PubKey: pubKey,
-	}
+	pbBytes, _ := hex.DecodeString(privKey)
+	id := identity.New(anonymous, pbBytes)
 
 	ingressExpiry := time.Second * 10
 	return &Agent{
 		client:        &c,
-		key:           pair,
+		identity:      id,
 		ingressExpiry: ingressExpiry,
 		rootKey:       status.RootKey,
-	},m
-
+	}
 }
 
 func (agent *Agent) Sender() *principal.Principal {
-	sha3.New224()
-	pub := agent.key.PubKey.SerializeUncompressed()
-	sender := principal.NewSelfAuthenticating(pub)
+	if agent.identity.Anonymous == true {
+		return &principal.AnonymousID
+	}
+	pub := agent.identity.PubKey
+	sender := principal.NewSelfAuthenticating(pub.SerializeUncompressed())
 	return &sender
 }
 
@@ -53,16 +46,17 @@ func (agent *Agent) getExpiryDate() time.Time {
 	return time.Now().Add(agent.ingressExpiry)
 }
 
-func (agent *Agent) queryEndpoint(canisterID string, data []byte) (map[string]interface{}, error) {
+func (agent *Agent) queryEndpoint(canisterID string, data []byte) (*QueryResponse, error) {
 	resp, err := agent.client.query(canisterID, data)
 	if err != nil {
 		return nil, err
 	}
-	result := make(map[string]interface{})
+	result := new(QueryResponse)
 	err = cbor.Unmarshal(resp, result)
 	if err != nil {
 		return result, err
 	}
+	fmt.Println(resp)
 	return result, nil
 }
 
@@ -80,15 +74,6 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	if err != nil {
 		return nil, nil, "", err
 	}
-
-	//ingressExpiry,err := idl.Encode([]idl.Type{new(idl.Nat)},[]interface{}{big.NewInt(agent.getExpiryDate().UnixNano())})
-	//req := make(map[string]interface{})
-	//req["type"] = RequestTypeQuery
-	//req["sender"] =  *agent.Sender()
-	//req["canister_id"] = canisterIDPrincipal
-	//req["method_name"] = methodName
-	//req["ingress_expiry"] = uint64(agent.getExpiryDate().UnixNano())
-	//req["arg"] = arg
 	req := Request{
 		Type:          RequestTypeQuery,
 		Sender:        *agent.Sender(),
@@ -97,23 +82,23 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 		Arguments:     arg,
 		IngressExpiry: uint64(agent.getExpiryDate().UnixNano()),
 	}
-
 	_, data, err := agent.signRequest(req)
 	if err != nil {
 		return nil, nil, "", err
 	}
+	//data,_ = hex.DecodeString("a367636f6e74656e74a66c726571756573745f747970656571756572796673656e646572581d8139de9ec81d50d862a956dd95e8d705e462f9e8df206ff4fe498739026b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65646e616d6563617267464449444c00006e696e67726573735f6578706972791b16c4df04ce1440006d73656e6465725f7075626b6579582c302a300506032b6570032100ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf6a73656e6465725f73696758408cd1def386a59e59d29adf00cbc735dc8a3dba48c715e6f69a6f9e0ede937c404e6fd7c1bd2583f49a63b597fa1d90fd3feefc88d4eb731ff2c96af51ea3ac02")
 	resp, err := agent.queryEndpoint(canisterID, data)
 	if err != nil {
 		return nil, nil, "", err
 	}
-	if resp["status"].(string) == "replied" {
-		types, values, err := idl.Decode(resp["reply"].(map[string]interface{})["arg"].([]byte))
+	if resp.Status == "replied" {
+		types, values, err := idl.Decode(resp.Reply["arg"])
 		if err != nil {
 			return nil, nil, "", err
 		}
 		return types, values, "", nil
-	} else if resp["status"] == "rejected" {
-		return nil, nil, resp["reject_message"].(string), nil
+	} else if resp.Status == "rejected" {
+		return nil, nil, resp.RejectMsg, nil
 	}
 	return nil, nil, "", nil
 }
@@ -131,13 +116,6 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 		Arguments:     arg,
 		IngressExpiry: uint64(agent.getExpiryDate().Nanosecond()),
 	}
-	//req := make(map[string]interface{})
-	//req["type"] = RequestTypeCall
-	//req["sender"] =  *agent.Sender()
-	//req["canister_id"] = canisterIDPrincipal
-	//req["method_name"] = methodName
-	//req["ingress_expiry"] = uint64(agent.getExpiryDate().UnixNano())
-	//req["arg"] = arg
 
 	requestID, data, err := agent.signRequest(req)
 	if err != nil {
@@ -193,7 +171,7 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 		}
 		return res, nil
 	}
-	return nil,fmt.Errorf("call poll fail with status %v",finalStatus)
+	return nil, fmt.Errorf("call poll fail with status %v", finalStatus)
 }
 
 func (agent *Agent) requestStatusRaw(canisterID string, requestId RequestID) ([]byte, []byte, error) {
@@ -217,11 +195,6 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][]byte) ([]byte, err
 		Paths:         paths,
 		IngressExpiry: uint64(agent.getExpiryDate().Nanosecond()),
 	}
-	//req := make(map[string]interface{})
-	//req["type"] = RequestTypeReadState
-	//req["sender"] =  *agent.Sender()
-	//req["paths"] = paths
-	//req["ingress_expiry"] = uint64(agent.getExpiryDate().UnixNano())
 
 	_, data, err := agent.signRequest(req)
 	if err != nil {
@@ -241,47 +214,18 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][]byte) ([]byte, err
 	return result.certificate, nil
 }
 
-//func (agent *Agent) signRequest(req map[string]interface{}) (*RequestID, []byte, error) {
-//	requestID := EncodeRequestID(req)
-//	msg := []byte(IC_REQUEST_DOMAIN_SEPARATOR)
-//	msg = append(msg, requestID[:]...)
-//	sig, err := agent.key.Sign(msg)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//
-//	envelope := make(map[string]interface{})
-//	envelope["content"] = req
-//	envelope["sender_pubkey"] = agent.key.PubKey.SerializeUncompressed()
-//	envelope["sender_sig"] = sig.Serialize()
-//	//envelope := Envelope{
-//	//	Content:      req,
-//	//	SenderPubkey: agent.key.PubKey.SerializeUncompressed(),
-//	//	SenderSig:    sig.Serialize(),
-//	//}
-//	marshaledEnvelope, err := cbor.Marshal(envelope)
-//	if err != nil {
-//		return nil, nil, err
-//	}
-//	return &requestID, marshaledEnvelope, nil
-//}
 func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 	requestID := NewRequestID(req)
 	msg := []byte(IC_REQUEST_DOMAIN_SEPARATOR)
 	msg = append(msg, requestID[:]...)
-	sig, err := agent.key.Sign(msg)
+	sig, err := agent.identity.Sign(msg)
 	if err != nil {
 		return nil, nil, err
 	}
-
-	//envelope := make(map[string]interface{})
-	//envelope["content"] = req
-	//envelope["sender_pubkey"] = agent.key.PubKey.SerializeUncompressed()
-	//envelope["sender_sig"] = sig.Serialize()
 	envelope := Envelope{
 		Content:      req,
-		SenderPubkey: agent.key.PubKey.SerializeUncompressed(),
-		SenderSig:    sig.Serialize(),
+		SenderPubkey: agent.identity.PubKeyBytes(),
+		SenderSig:    sig,
 	}
 	marshaledEnvelope, err := cbor.Marshal(envelope)
 	if err != nil {
