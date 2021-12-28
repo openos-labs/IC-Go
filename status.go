@@ -48,6 +48,6 @@ func (s *Status) UnmarshalCBOR(data []byte) error {
 type QueryResponse struct {
 	Status     string            `cbor:"status"`
 	Reply      map[string][]byte `cbor:"reply"`
-	RejectCode []byte            `cbor:"status"`
+	RejectCode uint64            `cbor:"reject_code"`
 	RejectMsg  string            `cbor:"reject_message"`
 }

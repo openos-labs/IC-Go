@@ -56,7 +56,9 @@ func (agent *Agent) queryEndpoint(canisterID string, data []byte) (*QueryRespons
 	if err != nil {
 		return result, err
 	}
-	fmt.Println(resp)
+
+	fmt.Println(hex.EncodeToString(resp))
+	fmt.Println(result)
 	return result, nil
 }
 
