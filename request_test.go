@@ -2,9 +2,8 @@ package agent_test
 
 import (
 	"fmt"
+	agent "github.com/stopWarByWar/ic-agent"
 	"testing"
-
-	"github.com/aviate-labs/agent-go"
 )
 
 func TestNewRequestID(t *testing.T) {

@@ -2,6 +2,7 @@ package identity
 
 import (
 	"encoding/hex"
+	"strconv"
 	"testing"
 )
 
@@ -11,4 +12,10 @@ func TestKeys(t *testing.T) {
 	t.Log(hex.EncodeToString([]byte("pyd")))
 	sign,_ := identity.Sign([]byte("pyd"))
 	t.Log(hex.EncodeToString(sign),len(sign))
+}
+
+func TestNew(t *testing.T) {
+	var a []byte
+	result := strconv.AppendInt(a,-24,8)
+	t.Logf("%x",result)
 }

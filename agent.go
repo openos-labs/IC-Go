@@ -3,10 +3,10 @@ package agent
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/aviate-labs/agent-go/internal/key"
-	"github.com/aviate-labs/candid-go/idl"
-	"github.com/aviate-labs/principal-go"
 	"github.com/fxamacker/cbor/v2"
+	"github.com/stopWarByWar/ic-agent/internal/identity"
+	"github.com/stopWarByWar/ic-agent/internal/idl"
+	"github.com/stopWarByWar/ic-agent/internal/principal"
 	"time"
 )
 
@@ -14,7 +14,7 @@ type Agent struct {
 	client        *Client
 	identity      *identity.Identity
 	ingressExpiry time.Duration
-	rootKey       []byte //ICP root key
+	rootKey       []byte //ICP root identity
 }
 
 func New(anonymous bool, privKey string) *Agent {
@@ -159,7 +159,6 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 			if finalStatus == "replied" || finalStatus == "done" || finalStatus == "rejected" {
 				break
 			}
-
 		case <-timer.C:
 			break
 		}

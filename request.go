@@ -3,11 +3,10 @@ package agent
 import (
 	"bytes"
 	"crypto/sha256"
+	"github.com/aviate-labs/leb128"
+	"github.com/stopWarByWar/ic-agent/internal/principal"
 	"math/big"
 	"sort"
-
-	"github.com/aviate-labs/leb128"
-	"github.com/aviate-labs/principal-go"
 )
 
 var (

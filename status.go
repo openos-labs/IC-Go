@@ -20,7 +20,7 @@ type Status struct {
 	Version string
 	// Impl describes the implementation of the Internet Computer.
 	Impl *Implementation
-	// The public key (a DER-encoded BLS key) of the root key of this Internet Computer instance.
+	// The public identity (a DER-encoded BLS identity) of the root identity of this Internet Computer instance.
 	RootKey []byte
 }
 
