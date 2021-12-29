@@ -36,8 +36,6 @@ func TestAgent_UpdateRaw(t *testing.T) {
 	argValue = append(argValue, big.NewInt(10000000000))
 
 	arg, _ := idl.Encode(argType, argValue)
-	t.Log("arg:", hex.EncodeToString(arg),len(arg))
-
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
 	t.Log("errMsg:", err, "result:", result)
 }

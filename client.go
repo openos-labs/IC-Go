@@ -35,7 +35,7 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 	fmt.Println("post url:", endpoint)
 	resp, err := c.client.Post(endpoint, "application/cbor", buffer)
 	if err != nil {
-		fmt.Println("error:",err)
+		fmt.Println("error:", err)
 		return nil, err
 	} else if resp.StatusCode != 200 {
 		fmt.Println(
@@ -50,7 +50,7 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 			"TransferEncoding:", resp.TransferEncoding, "\n",
 			"Request:", resp.Request,
 		)
-		return nil, fmt.Errorf("post error: %v", resp.Status)
+		return nil, fmt.Errorf("fail to post ic with status: %v", resp.Status)
 	}
 	defer resp.Body.Close()
 	return io.ReadAll(resp.Body)
@@ -59,10 +59,14 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestID, error) {
 	buffer := bytes.NewBuffer(data)
 	endpoint := c.host + "/api/v2/canister/" + canisterId + "/call"
+	fmt.Println("endpoint:", endpoint)
 	contentType := "application/cbor"
-	_, err := c.client.Post(endpoint, contentType, buffer)
+	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
 		return reqId, err
+	}
+	if resp.StatusCode != 200 {
+		return reqId, fmt.Errorf("fail to call ic with status: %v", resp.Status)
 	}
 	return reqId, nil
 }
@@ -70,10 +74,14 @@ func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestI
 func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 	buffer := bytes.NewBuffer(data)
 	endpoint := c.host + "/api/v2/canister/" + canisterId + "/read_state"
+	fmt.Println("endpoint:", endpoint)
 	contentType := "application/cbor"
 	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
 		return nil, err
+	}
+	if resp.StatusCode != 200 {
+		return []byte{}, fmt.Errorf("fail to read state with status: %v", resp.Status)
 	}
 	return io.ReadAll(resp.Body)
 }
@@ -86,13 +94,3 @@ func (c Client) get(path string) ([]byte, error) {
 	}
 	return io.ReadAll(resp.Body)
 }
-
-//func (c Client) url(p string) string {
-//	url := c.config.Host
-//	url.Path = path.Join(url.Path, p)
-//	return url.String()
-//}
-//
-//type ClientConfig struct {
-//	Host *url.URL
-//}
