@@ -17,6 +17,7 @@ var (
 	argumentsKey     = sha256.Sum256([]byte("arg"))
 	ingressExpiryKey = sha256.Sum256([]byte("ingress_expiry"))
 	senderKey        = sha256.Sum256([]byte("sender"))
+	pathKey          = sha256.Sum256([]byte("paths"))
 )
 
 type RequestType = string
@@ -45,7 +46,7 @@ type Request struct {
 	// Argument to pass to the canister method.
 	Arguments []byte `cbor:"arg,omitempty"`
 	// Paths (sequence of paths): A list of paths, where a path is itself a sequence of blobs.
-	Paths [][]byte `cbor:"paths,omitempty"`
+	Paths [][][]byte `cbor:"paths,omitempty"`
 }
 
 type RequestID [32]byte
@@ -57,38 +58,38 @@ func EncodeRequestID(request map[string]interface{}) RequestID {
 		case "request_type":
 			typeKey := sha256.Sum256([]byte("request_type"))
 			typeValue := sha256.Sum256([]byte(v.(string)))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "sender":
 			typeKey := sha256.Sum256([]byte("sender"))
 			typeValue := sha256.Sum256(v.([]byte))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "nonce":
 			typeKey := sha256.Sum256([]byte("nonce"))
 			typeValue := sha256.Sum256(v.([]byte))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "ingress_expiry":
 			typeKey := sha256.Sum256([]byte("ingress_expiry"))
 			typeValue := sha256.Sum256(encodeLEB128(v.(uint64)))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "canister_id":
 			typeKey := sha256.Sum256([]byte("canister_id"))
 			typeValue := sha256.Sum256(v.([]byte))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "method_name":
 			typeKey := sha256.Sum256([]byte("method_name"))
 			typeValue := sha256.Sum256([]byte(v.(string)))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		case "arg":
 			typeKey := sha256.Sum256([]byte("arg"))
 			typeValue := sha256.Sum256(v.([]byte))
-			result := append(typeKey[:],typeValue[:]...)
-			hashes = append(hashes,result)
+			result := append(typeKey[:], typeValue[:]...)
+			hashes = append(hashes, result)
 		default:
 		}
 	}
@@ -106,12 +107,20 @@ func NewRequestID(req Request) RequestID {
 		methodNameHash = sha256.Sum256([]byte(req.MethodName))
 		argumentsHash  = sha256.Sum256(req.Arguments)
 	)
-	hashes := [][]byte{
-		append(typeKey[:], typeHash[:]...),
-		append(canisterIDKey[:], canisterIDHash[:]...),
-		append(methodNameKey[:], methodNameHash[:]...),
-		append(argumentsKey[:], argumentsHash[:]...),
+	hashes := [][]byte{}
+	if len(req.Type) != 0 {
+		hashes = append(hashes, append(typeKey[:], typeHash[:]...))
 	}
+	if req.CanisterID != nil {
+		hashes = append(hashes, append(canisterIDKey[:], canisterIDHash[:]...))
+	}
+	if len(req.MethodName) != 0 {
+		hashes = append(hashes, append(methodNameKey[:], methodNameHash[:]...))
+	}
+	if req.Arguments != nil {
+		hashes = append(hashes, append(argumentsKey[:], argumentsHash[:]...))
+	}
+
 	if len(req.Sender) != 0 {
 		senderHash := sha256.Sum256(req.Sender)
 		hashes = append(hashes, append(senderKey[:], senderHash[:]...))
@@ -124,6 +133,10 @@ func NewRequestID(req Request) RequestID {
 		nonceHash := sha256.Sum256(req.Nonce)
 		hashes = append(hashes, append(nonceKey[:], nonceHash[:]...))
 	}
+	if len(req.Paths) != 0 {
+		pathHash:= encodeList3D(req.Paths)
+		hashes = append(hashes, append(pathKey[:], pathHash[:]...))
+	}
 	sort.Slice(hashes, func(i, j int) bool {
 		return bytes.Compare(hashes[i], hashes[j]) == -1
 	})
@@ -135,9 +148,26 @@ func encodeLEB128(i uint64) []byte {
 	e, _ := leb128.EncodeUnsigned(bi)
 	return e
 }
+//todo:之后用reflect写成一个函数
+func encodeList3D(lists [][][]byte) [32]byte {
+	var res []byte
+	for _, v := range lists {
+		code := encodeList2D(v)
+		res = append(res, code[:]...)
+	}
+	return sha256.Sum256(res)
+}
 
+func encodeList2D(lists [][]byte) [32]byte {
+	var res []byte
+	for _, v := range lists {
+		pathBytes := sha256.Sum256(v)
+		res = append(res, pathBytes[:]...)
+	}
+	return sha256.Sum256(res)
+}
 type Envelope struct {
 	Content      Request `cbor:"content,omitempty"`
-	SenderPubkey []byte   `cbor:"sender_pubkey,omitempty"`
-	SenderSig    []byte   `cbor:"sender_sig,omitempty"`
+	SenderPubkey []byte  `cbor:"sender_pubkey,omitempty"`
+	SenderSig    []byte  `cbor:"sender_sig,omitempty"`
 }

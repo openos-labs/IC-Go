@@ -1,6 +1,8 @@
 package agent_test
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
 	agent "github.com/stopWarByWar/ic-agent"
 	"testing"
@@ -32,4 +34,22 @@ func TestEncodeRequestID(t *testing.T) {
 	if h != "8781291c347db32a9d8c10eb62b710fce5a93be676474c42babc74c51858f94b" {
 		t.Fatal(h)
 	}
+}
+
+func TestEncodeList(t *testing.T) {
+	a := [][]byte{[]byte("i"),[]byte("love"),[]byte("you")}
+	res := encodeList(a)
+	t.Log(hex.EncodeToString([]byte("i")))
+	t.Log(hex.EncodeToString([]byte("love")))
+	t.Log(hex.EncodeToString([]byte("you")))
+	t.Log(hex.EncodeToString(res[:]))
+}
+
+func encodeList(paths [][]byte) [32]byte {
+	var pathsBytes []byte
+	for _, path := range paths {
+		pathBytes := sha256.Sum256(path)
+		pathsBytes = append(pathsBytes, pathBytes[:]...)
+	}
+	return sha256.Sum256(pathsBytes)
 }

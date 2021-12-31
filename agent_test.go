@@ -24,7 +24,7 @@ func TestAgent_QueryRaw(t *testing.T) {
 
 func TestAgent_UpdateRaw(t *testing.T) {
 	canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
-	agent := New(true, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 
 	//t.Log("time:", uint64(agent.getExpiryDate().UnixNano()))
 	//envelope := new(Envelope)

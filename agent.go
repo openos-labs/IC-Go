@@ -55,9 +55,9 @@ func (agent *Agent) queryEndpoint(canisterID string, data []byte) (*QueryRespons
 	if err != nil {
 		return result, err
 	}
-
-	fmt.Println(hex.EncodeToString(resp))
-	fmt.Println(result)
+	//
+	//fmt.Println(hex.EncodeToString(resp))
+	//fmt.Println(result)
 	return result, nil
 }
 
@@ -86,7 +86,7 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	if err != nil {
 		return nil, nil, "", err
 	}
-	fmt.Println("data:", hex.EncodeToString(data))
+	//fmt.Println("data:", hex.EncodeToString(data))
 	resp, err := agent.queryEndpoint(canisterID, data)
 	if err != nil {
 		return nil, nil, "", err
@@ -121,9 +121,8 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("IngressExpiry:",req.IngressExpiry)
-	fmt.Println("update request id:", hex.EncodeToString(requestID[:]))
-	fmt.Println("data:", hex.EncodeToString(data))
+	//fmt.Println("update request id:", hex.EncodeToString(requestID[:]))
+	//fmt.Println("data:", hex.EncodeToString(data))
 	//data,_ = hex.DecodeString("a367636f6e74656e74a66c726571756573745f747970656463616c6c6673656e646572581d8139de9ec81d50d862a956dd95e8d705e462f9e8df206ff4fe498739026b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65687472616e73666572636172674f4449444c0002687d010080c8afa0256e696e67726573735f6578706972791b16c5481082f22e006d73656e6465725f7075626b6579582c302a300506032b6570032100ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf6a73656e6465725f736967584028677b532f1baaa31619923381f3a3d0be33ff4212dfc984dd3649fd0fbec938edcb30f72d59d2f01d1697a6eda3ac1c7de231974c0e3239f37ddbdf5b98f60a")
 	_, err = agent.callEndpoint(canisterID, *requestID, data)
 	if err != nil {
@@ -147,21 +146,21 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 	var finalCert []byte
 	timer := time.NewTimer(timeout)
 	ticker := time.NewTicker(delay)
-	stopped := false
+	stopped := true
 	for stopped {
 		select {
 		case <-ticker.C:
 			status, cert, err := agent.requestStatusRaw(canisterID, requestID)
 			if err != nil {
-				fmt.Printf("can not request status raw with error : %v", err)
+				fmt.Printf("can not request status raw with error : %v\n", err)
 			}
 			finalStatus = string(status)
 			finalCert = append(finalCert, cert...)
 			if finalStatus == "replied" || finalStatus == "done" || finalStatus == "rejected" {
-				stopped = true
+				stopped = false
 			}
 		case <-timer.C:
-			stopped = true
+			stopped = false
 		}
 	}
 	if finalStatus == "replied" {
@@ -179,27 +178,26 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 
 func (agent *Agent) requestStatusRaw(canisterID string, requestId RequestID) ([]byte, []byte, error) {
 	//todo:回头看看这么编码行不行
-	paths := [][]byte{[]byte("request_status"), requestId[:]}
+	paths := [][][]byte{{[]byte("request_status"), requestId[:]}}
 	cert, err := agent.readStateRaw(canisterID, paths)
 	if err != nil {
 		return nil, nil, err
 	}
-	//print(cert)
-	paths = append(paths, []byte("status"))
-	status, err := LookUp(paths, cert)
+	path := [][]byte{[]byte("request_status"), requestId[:], []byte("status")}
+	status, err := LookUp(path, cert)
 	return status, cert, err
 }
 
-func (agent *Agent) readStateRaw(canisterID string, paths [][]byte) ([]byte, error) {
+func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, error) {
 	req := Request{
-		Type:   RequestTypeReadState,
-		Sender: agent.Sender(),
-		Paths:  paths,
+		Type:          RequestTypeReadState,
+		Sender:        agent.Sender(),
+		Paths:         paths,
 		IngressExpiry: uint64(agent.getExpiryDate().UnixNano()),
 	}
 
 	_, data, err := agent.signRequest(req)
-	fmt.Println("Data:", hex.EncodeToString(data))
+	fmt.Println("Read state Data:", hex.EncodeToString(data))
 	//data,_ = hex.DecodeString("a367636f6e74656e74a66c726571756573745f747970656463616c6c6673656e646572581d8139de9ec81d50d862a956dd95e8d705e462f9e8df206ff4fe498739026b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65687472616e73666572636172674f4449444c0002687d010080c8afa0256e696e67726573735f6578706972791b16c52f08c78464006d73656e6465725f7075626b6579582c302a300506032b6570032100ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf6a73656e6465725f73696758404093a2371ab4fc3a2e742bed6ed0606f14f35cffd40235e15ae47aa628a0375f252eaee777149d2326ec99900b135a2f2b291df0f3752223e407065947141307")
 
 	if err != nil {
