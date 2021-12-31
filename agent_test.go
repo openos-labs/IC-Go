@@ -2,17 +2,19 @@ package agent
 
 import (
 	"encoding/hex"
+	"fmt"
+	"math/big"
+	"testing"
+
 	"github.com/fxamacker/cbor/v2"
 	"github.com/stopWarByWar/ic-agent/internal/identity"
 	"github.com/stopWarByWar/ic-agent/internal/idl"
 	"github.com/stopWarByWar/ic-agent/internal/principal"
-	"math/big"
-	"testing"
 )
 
 func TestAgent_QueryRaw(t *testing.T) {
 	canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
-	agent := New(true, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	methodName := "totalSupply"
 	arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
 	if err != nil {
@@ -25,7 +27,8 @@ func TestAgent_QueryRaw(t *testing.T) {
 func TestAgent_UpdateRaw(t *testing.T) {
 	canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-
+	
+	fmt.Println(hex.EncodeToString(agent.identity.PubKeyBytes()))
 	//t.Log("time:", uint64(agent.getExpiryDate().UnixNano()))
 	//envelope := new(Envelope)
 	//data, _ := hex.DecodeString("a167636f6e74656e74a66c726571756573745f747970656463616c6c6673656e64657241046e696e67726573735f6578706972791a2f449dd06b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65687472616e73666572636172674f4449444c0002687d010080c8afa025")
