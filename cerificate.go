@@ -3,6 +3,7 @@ package agent
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/fxamacker/cbor/v2"
 )
 
@@ -15,12 +16,17 @@ const (
 )
 
 func LookUp(paths [][]byte, cert []byte)([]byte, error) {
-	certificate := new(Certificate)
+	//certificate := new(Certificate)
+	var certificate interface{}
 	err := cbor.Unmarshal(cert, &certificate)
 	if err != nil{
 		return nil,err
 	}
-	return lookupPath(paths,&certificate.Tree)
+	certi_struct, ok := certificate.(map[string]interface{})
+	if ok {
+		fmt.Println(certi_struct["tree"])
+	}
+	return nil, nil//lookupPath(paths,&certificate.Tree)
 }
 
 func lookupPath(paths [][]byte, tree *Tree) ([]byte, error) {

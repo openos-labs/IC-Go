@@ -210,20 +210,27 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	result := struct {
-		certificate []byte `cbor:"certificate"`
-	}{}
+	// result := struct {
+	// 	certificate []byte `cbor:"certificate"`
+	// }{}
+	result := map[string][]byte{}
 	//result := []byte{}
 	
 	err = cbor.Unmarshal(resp, &result)
 	if err != nil {
 		//return nil, err
-		err_result := []byte{}
-		err = cbor.Unmarshal(resp, &err_result)
 		return nil, err
 	}
-	fmt.Println("result!!!!   ", result.certificate)
-	return result.certificate, nil
+	//fmt.Println(result)
+	// result_again := map[string][]byte{}
+	// err = cbor.Unmarshal(result["certificate"], &result_again)
+	// if err != nil {
+	// 	//return nil, err
+	// 	return nil, err
+	// }
+
+	fmt.Println("result!!!!   ", result["certificate"])
+	return result["certificate"], nil
 	//return result["certificate"], nil
 }
 
