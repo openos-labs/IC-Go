@@ -135,6 +135,7 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
+	fmt.Println("DIDL  ", hex.EncodeToString(result))
 	types, values, err := idl.Decode(result)
 	if err != nil {
 		return nil, nil, err
@@ -229,7 +230,7 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, e
 	// 	return nil, err
 	// }
 
-	fmt.Println("result!!!!   ", result["certificate"])
+	//fmt.Println("result!!!!   ", result["certificate"])
 	return result["certificate"], nil
 	//return result["certificate"], nil
 }
