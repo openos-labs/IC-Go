@@ -45,13 +45,13 @@ type Type interface {
 	fmt.Stringer
 }
 
-func getType(t int64, tds []Type) (Type, error) {
-	if t >= 0 {
-		if int(t) >= len(tds) {
-			return nil, fmt.Errorf("type index out of range: %d", t)
-		}
-		return tds[t], nil
-	}
+func getType(t int64) (Type, error) {
+	// if t >= 0 {
+	// 	if int(t) >= len(tds) {
+	// 		return nil, fmt.Errorf("type index out of range: %d", t)
+	// 	}
+	// 	return tds[t], nil
+	// }
 
 	switch t {
 	case nullType:
