@@ -78,7 +78,7 @@ func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
 		return nil, err
 	}
 	return &FieldValue{
-		Name:  id.String(),
+		Name:  v.Fields[int(id.Int64())].Name,
 		Value: v_,
 	}, nil
 }
