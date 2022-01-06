@@ -2,6 +2,7 @@ package idl
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"math/big"
 
@@ -90,6 +91,7 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 }
 
 func Decode(bs []byte) ([]Type, []interface{}, error) {
+	fmt.Println(hex.EncodeToString(bs))
 	if len(bs) == 0 {
 		return nil, nil, &FormatError{
 			Description: "empty",
@@ -480,10 +482,18 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 	{ // I
 		for i := 0; i < int(tsl.Int64()); i++ {
 			tid, err := leb128.DecodeSigned(r)
+			var t Type
 			if err != nil {
 				return nil, nil, err
 			}
-			t := tds[int(tid.Int64())]
+			if tid.Int64() < 0 {
+				t, err = getType(tid.Int64())
+				if err != nil {
+					return nil, nil, err
+				}
+			} else {
+				t = tds[int(tid.Int64())]
+			}
 			ts = append(ts, t)
 		}
 	}
