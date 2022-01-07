@@ -8,5 +8,5 @@ require (
 	github.com/btcsuite/btcd v0.22.0-beta
 	github.com/dfinity/keysmith v1.6.2
 	github.com/di-wu/parser v0.3.0
-	github.com/fxamacker/cbor/v2 v2.3.1
+	github.com/fxamacker/cbor/v2 v2.4.0
 )
