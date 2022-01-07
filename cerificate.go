@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/hex"
-	"fmt"
 
 	"github.com/fxamacker/cbor/v2"
 )
@@ -16,7 +15,6 @@ const (
 )
 
 func LookUp(paths [][]byte, cert []byte)([]byte, error) {
-	//certificate := new(Certificate)
 	var certificate interface{}
 	err := cbor.Unmarshal(cert, &certificate)
 	if err != nil{
@@ -33,13 +31,13 @@ func LookUp(paths [][]byte, cert []byte)([]byte, error) {
 			if !ok {
 				continue
 			}
-			//fmt.Println("tree     ", tree_value)
+			
 			return lookupPath(paths, tree_value)
 
 		}
 	}
 	
-	return nil, nil//lookupPath(paths,&certificate.Tree)
+	return nil, nil
 }
 
 func lookupPath(paths [][]byte, tree []interface{})([]byte, error) {
@@ -67,7 +65,6 @@ func lookupPath(paths [][]byte, tree []interface{})([]byte, error) {
 	}
 	label := paths[0]
 
-	//fmt.Println(offset, label)
 
 	t_flatten, _ := flattenForks(tree)
 	t, _ := findLabel(label, t_flatten)
@@ -117,7 +114,7 @@ func findLabel(label []byte, trees [][]interface{}) ([]interface{}, error) {
 				return nil, nil
 			}
 			if (hex.EncodeToString(t_1) != hex.EncodeToString(label)) {
-				fmt.Println(label, "   error")
+				//fmt.Println(label, "   error")
 				continue
 			}
 			t_2, ok := t[2].([]interface{})
@@ -130,51 +127,6 @@ func findLabel(label []byte, trees [][]interface{}) ([]interface{}, error) {
 	return nil, nil
 }
 
-// func flattenForks(tree *Tree) ([]*Tree, error) {
-// 	var trees []*Tree
-// 	if tree.sym == Fork {
-// 		left := new(Tree)
-// 		err := cbor.Unmarshal(tree.a, left)
-// 		if err != nil {
-// 			return trees, err
-// 		}
-// 		right := new(Tree)
-// 		err = cbor.Unmarshal(tree.a, right)
-// 		if err != nil {
-// 			return trees, err
-// 		}
-// 		leftSubTree, err := flattenForks(left)
-// 		if err != nil {
-// 			return trees, err
-// 		}
-// 		rightSubTree, err := flattenForks(right)
-// 		if err != nil {
-// 			return trees, err
-// 		}
-// 		trees = append(trees, leftSubTree...)
-// 		trees = append(trees, rightSubTree...)
-// 	}
-// 	return trees, nil
-// }
-
-// func findLabel(label []byte, trees []*Tree) (*Tree, error) {
-// 	if len(trees) == 0 {
-// 		return nil, nil
-// 	}
-// 	for _, t := range trees {
-// 		if t.sym == Labeled {
-// 			if bytes.Equal(label, t.a) {
-// 				subTree := new(Tree)
-// 				err := cbor.Unmarshal(t.b, subTree)
-// 				if err != nil {
-// 					return nil, err
-// 				}
-// 				return subTree, nil
-// 			}
-// 		}
-// 	}
-// 	return nil, fmt.Errorf("can not find lable : %x", string(label))
-// }
 
 type Certificate struct {
 	Tree       Tree   `cbor:"tree"`

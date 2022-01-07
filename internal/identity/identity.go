@@ -5,7 +5,6 @@ import (
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"errors"
-	"fmt"
 
 	"crypto/ed25519"
 )
@@ -139,11 +138,11 @@ func New(anonymous bool, pkBytes []byte) *Identity {
 		}
 	}
 	privKey := ed25519.NewKeyFromSeed(pkBytes)
-	fmt.Println(privKey)
+	//fmt.Println(privKey)
 	pubKey := privKey.Public()
 	
-	fmt.Println(pubKey)
-	//privKey, pubkey := btcec.PrivKeyFromBytes(btcec.S256(), pkBytes)
+	//fmt.Println(pubKey)
+	
 	return &Identity{
 		anonymous,
 		privKey,
@@ -162,22 +161,18 @@ func (identity *Identity) Sign(m []byte) ([]byte, error) {
 	if identity.Anonymous == true {
 		return []byte{}, nil
 	}
-	//hashByte := sha256.Sum256(m)
-	sign := ed25519.Sign(identity.PriKey, m[:])
-	//sign, err := identity.PriKey.Sign(hashByte[:])
-	// if err != nil {
-	// 	return nil, err
-	// }
 	
-	return sign, nil//codec.EncodeECSig(sign), nil
+	sign := ed25519.Sign(identity.PriKey, m[:])
+	
+	
+	return sign, nil
 }
 
 func (identity *Identity) PubKeyBytes() []byte {
 	var senderPubKey []byte
 	if identity.Anonymous == false {
-		//pkBytes, _ := codec.EncodeECPubKey(identity.PubKey)
 		pkBytes, _ := MarshalEd25519PublicKey(identity.PubKey)
-		//fmt.Println(err)
+		
 		return pkBytes
 	}
 	return senderPubKey

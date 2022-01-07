@@ -56,9 +56,6 @@ func (agent *Agent) queryEndpoint(canisterID string, data []byte) (*QueryRespons
 	if err != nil {
 		return result, err
 	}
-	//
-	//fmt.Println(hex.EncodeToString(resp))
-	//fmt.Println(result)
 	return result, nil
 }
 
@@ -87,9 +84,9 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	if err != nil {
 		return nil, nil, "", err
 	}
-	//fmt.Println("data:", hex.EncodeToString(data))
+	
 	resp, err := agent.queryEndpoint(canisterID, data)
-	//fmt.Println("resp   ", resp)
+
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -123,9 +120,8 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
-	//fmt.Println("update request id:", hex.EncodeToString(requestID[:]))
-	//fmt.Println("data:", hex.EncodeToString(data))
-	//data,_ = hex.DecodeString("a367636f6e74656e74a66c726571756573745f747970656463616c6c6673656e646572581d8139de9ec81d50d862a956dd95e8d705e462f9e8df206ff4fe498739026b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65687472616e73666572636172674f4449444c0002687d010080c8afa0256e696e67726573735f6578706972791b16c5481082f22e006d73656e6465725f7075626b6579582c302a300506032b6570032100ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf6a73656e6465725f736967584028677b532f1baaa31619923381f3a3d0be33ff4212dfc984dd3649fd0fbec938edcb30f72d59d2f01d1697a6eda3ac1c7de231974c0e3239f37ddbdf5b98f60a")
+	
+	
 	_, err = agent.callEndpoint(canisterID, *requestID, data)
 	if err != nil {
 		return nil, nil, err
@@ -136,7 +132,6 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("DIDL begin  ", len(result))
 	types, values, err := idl.Decode(result)
 	if err != nil {
 		return nil, nil, err
@@ -158,8 +153,7 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 				fmt.Printf("can not request status raw with error : %v\n", err)
 			}
 			finalStatus = string(status)
-			finalCert = cert//append(finalCert, cert...)
-			fmt.Println(finalStatus, len(finalCert))
+			finalCert = cert
 			if finalStatus == "replied" || finalStatus == "done" || finalStatus == "rejected" {
 				stopped = false
 			}
@@ -170,7 +164,6 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 	if finalStatus == "replied" {
 		paths := [][]byte{[]byte("request_status"), requestID[:], []byte("reply")}
 		res, err := LookUp(paths, finalCert)
-		fmt.Println("res  ", len(res))
 		if err != nil {
 			return nil, err
 		}
@@ -182,10 +175,10 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 }
 
 func (agent *Agent) requestStatusRaw(canisterID string, requestId RequestID) ([]byte, []byte, error) {
-	//todo:回头看看这么编码行不行
+	
 	paths := [][][]byte{{[]byte("request_status"), requestId[:]}}
 	cert, err := agent.readStateRaw(canisterID, paths)
-	//fmt.Println("err ", err)
+	
 	if err != nil {
 		return nil, nil, err
 	}
@@ -203,8 +196,6 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, e
 	}
 
 	_, data, err := agent.signRequest(req)
-	//fmt.Println("Read state Data:", hex.EncodeToString(data))
-	//data,_ = hex.DecodeString("a367636f6e74656e74a66c726571756573745f747970656463616c6c6673656e646572581d8139de9ec81d50d862a956dd95e8d705e462f9e8df206ff4fe498739026b63616e69737465725f69644a0000000000f010ec01016b6d6574686f645f6e616d65687472616e73666572636172674f4449444c0002687d010080c8afa0256e696e67726573735f6578706972791b16c52f08c78464006d73656e6465725f7075626b6579582c302a300506032b6570032100ec172b93ad5e563bf4932c70e1245034c35467ef2efd4d64ebf819683467e2bf6a73656e6465725f73696758404093a2371ab4fc3a2e742bed6ed0606f14f35cffd40235e15ae47aa628a0375f252eaee777149d2326ec99900b135a2f2b291df0f3752223e407065947141307")
 
 	if err != nil {
 		return nil, err
@@ -213,37 +204,21 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	// result := struct {
-	// 	certificate []byte `cbor:"certificate"`
-	// }{}
+	
 	result := map[string][]byte{}
-	//result := []byte{}
 	
 	err = cbor.Unmarshal(resp, &result)
 	if err != nil {
-		//return nil, err
 		return nil, err
 	}
-	//fmt.Println(result)
-	// result_again := map[string][]byte{}
-	// err = cbor.Unmarshal(result["certificate"], &result_again)
-	// if err != nil {
-	// 	//return nil, err
-	// 	return nil, err
-	// }
-
-	//fmt.Println("result!!!!   ", result["certificate"])
 	return result["certificate"], nil
-	//return result["certificate"], nil
 }
 
 func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 	requestID := NewRequestID(req)
-	//fmt.Println(hex.EncodeToString(requestID[:]), "   req_id")
 	msg := []byte(IC_REQUEST_DOMAIN_SEPARATOR)
 	msg = append(msg, requestID[:]...)
 	sig, err := agent.identity.Sign(msg)
-	//fmt.Println(hex.EncodeToString(sig))
 	if err != nil {
 		return nil, nil, err
 	}
@@ -253,7 +228,6 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 		SenderSig:    sig,
 	}
 
-	//fmt.Println("envelope:",envelope)
 	marshaledEnvelope, err := cbor.Marshal(envelope)
 	if err != nil {
 		return nil, nil, err

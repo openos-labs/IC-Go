@@ -32,7 +32,7 @@ func (c *Client) Status() (Status, error) {
 func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 	buffer := bytes.NewBuffer(data)
 	endpoint := c.host + "/api/v2/canister/" + canisterId + "/query"
-	fmt.Println("post url:", endpoint)
+	//fmt.Println("post url:", endpoint)
 	resp, err := c.client.Post(endpoint, "application/cbor", buffer)
 	if err != nil {
 		fmt.Println("error:", err)
@@ -59,7 +59,7 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestID, error) {
 	buffer := bytes.NewBuffer(data)
 	endpoint := c.host + "/api/v2/canister/" + canisterId + "/call"
-	fmt.Println("endpoint:", endpoint)
+	//fmt.Println("endpoint:", endpoint)
 	contentType := "application/cbor"
 	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
@@ -75,7 +75,6 @@ func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestI
 func (c *Client) readState(canisterId string, data []byte) ([]byte, error) {
 	buffer := bytes.NewBuffer(data)
 	endpoint := c.host + "/api/v2/canister/" + canisterId + "/read_state"
-	fmt.Println("endpoint:", endpoint)
 	contentType := "application/cbor"
 	resp, err := c.client.Post(endpoint, contentType, buffer)
 	if err != nil {
