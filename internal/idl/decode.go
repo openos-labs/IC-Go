@@ -21,14 +21,32 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 	switch pair.Type {
 	case optType:
 		tid := pair.single_value
-		v, err := getType(tid)
+		var v Type
+		var err error
+		if tid >= 0 {
+			if int(tid) >= len(raw_table) {
+				return nil, nil
+			}
+			v, err = _Decode(raw_table, tid)
+		} else{
+			v, err = getType(tid)
+		}
 		if err != nil {
 			return nil, err
 		}
 		return &Opt{v}, nil
 	case vecType:
 		tid := pair.single_value
-		v, err := getType(tid)
+		var v Type
+		var err error
+		if tid >= 0 {
+			if int(tid) >= len(raw_table) {
+				return nil, nil
+			}
+			v, err = _Decode(raw_table, tid)
+		} else{
+			v, err = getType(tid)
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -91,6 +109,7 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 }
 
 func Decode(bs []byte) ([]Type, []interface{}, error) {
+	fmt.Println("aaa", len(bs))
 	fmt.Println(hex.EncodeToString(bs))
 	if len(bs) == 0 {
 		return nil, nil, &FormatError{
@@ -512,5 +531,6 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 	if r.Len() != 0 {
 		return nil, nil, fmt.Errorf("too long")
 	}
+	fmt.Println("vs   ", len(vs))
 	return ts, vs, nil
 }

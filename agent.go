@@ -89,6 +89,7 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	}
 	//fmt.Println("data:", hex.EncodeToString(data))
 	resp, err := agent.queryEndpoint(canisterID, data)
+	//fmt.Println("resp   ", resp)
 	if err != nil {
 		return nil, nil, "", err
 	}
@@ -135,7 +136,7 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
-	fmt.Println("DIDL  ", hex.EncodeToString(result))
+	fmt.Println("DIDL begin  ", len(result))
 	types, values, err := idl.Decode(result)
 	if err != nil {
 		return nil, nil, err
@@ -157,8 +158,8 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 				fmt.Printf("can not request status raw with error : %v\n", err)
 			}
 			finalStatus = string(status)
-			finalCert = append(finalCert, cert...)
-			//fmt.Println(finalCert)
+			finalCert = cert//append(finalCert, cert...)
+			fmt.Println(finalStatus, len(finalCert))
 			if finalStatus == "replied" || finalStatus == "done" || finalStatus == "rejected" {
 				stopped = false
 			}
@@ -169,6 +170,7 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 	if finalStatus == "replied" {
 		paths := [][]byte{[]byte("request_status"), requestID[:], []byte("reply")}
 		res, err := LookUp(paths, finalCert)
+		fmt.Println("res  ", len(res))
 		if err != nil {
 			return nil, err
 		}

@@ -2,6 +2,7 @@ package agent
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -12,15 +13,17 @@ import (
 )
 
 func TestAgent_QueryRaw(t *testing.T) {
-	canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
+	canisterID := "bzsui-sqaaa-aaaah-qce2a-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	methodName := "totalSupply"
+	methodName := "listings"
 	arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
+	//arg, err := idl.Encode([]idl.Type{new(idl.Text)}, []interface{}{"Motoko"})
 	if err != nil {
 		t.Error(err)
 	}
+	fmt.Println("a")
 	_, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-	t.Log("errMsg:", errMsg, "err:", err, "result:", result[0].(*big.Int))
+	t.Log("errMsg:", errMsg, "err:", err, "result:", result[0])
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
@@ -52,7 +55,9 @@ func TestAgent_UpdateRaw(t *testing.T) {
 
 	arg, _ := idl.Encode(argType, argValue)
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
-	t.Log("errMsg:", err, "result:", result)
+	fmt.Println(len(result))
+	t.Log(len(result))
+	t.Log("errMsg:", err, "result:", result[0])
 }
 
 func TestPrincipal(t *testing.T) {
