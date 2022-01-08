@@ -6,7 +6,7 @@ import (
 	"math/big"
 
 	"github.com/aviate-labs/leb128"
-	"github.com/mix-labs/IC-Go/internal/principal"
+	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
 type Principal struct {

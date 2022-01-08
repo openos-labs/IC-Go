@@ -1,7 +1,7 @@
 package idl_test
 
 import (
-	"github.com/stopWarByWar/ic-agent/internal/idl"
+	"github.com/mix-labs/IC-Go/utils/idl"
 )
 
 func ExampleBool() {

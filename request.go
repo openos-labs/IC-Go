@@ -5,7 +5,7 @@ import (
 	"crypto/sha256"
 
 	"github.com/aviate-labs/leb128"
-	"github.com/mix-labs/IC-Go/internal/principal"
+	"github.com/mix-labs/IC-Go/utils/principal"
 
 	"math/big"
 	"sort"

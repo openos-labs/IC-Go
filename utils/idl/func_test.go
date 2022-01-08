@@ -1,8 +1,8 @@
 package idl_test
 
 import (
-	"github.com/stopWarByWar/ic-agent/internal/idl"
-	"github.com/stopWarByWar/ic-agent/internal/principal"
+	"github.com/mix-labs/IC-Go/utils/idl"
+	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
 func ExampleFunc() {
