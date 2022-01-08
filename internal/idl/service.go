@@ -3,8 +3,10 @@ package idl
 import (
 	"bytes"
 	"fmt"
+
 	"github.com/aviate-labs/leb128"
-	"github.com/stopWarByWar/ic-agent/internal/principal"
+	"github.com/mix-labs/IC-Go/internal/principal"
+
 	"math/big"
 	"sort"
 	"strings"

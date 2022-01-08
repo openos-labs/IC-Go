@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/stopWarByWar/ic-agent/internal/identity"
-	"github.com/stopWarByWar/ic-agent/internal/idl"
-	"github.com/stopWarByWar/ic-agent/internal/principal"
+	"github.com/mix-labs/IC-Go/internal/identity"
+	"github.com/mix-labs/IC-Go/internal/idl"
+	"github.com/mix-labs/IC-Go/internal/principal"
 )
 
 func TestAgent_QueryRaw(t *testing.T) {

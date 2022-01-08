@@ -4,8 +4,9 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
-	agent "github.com/stopWarByWar/ic-agent"
 	"testing"
+
+	agent "github.com/mix-labs/IC-Go"
 )
 
 func TestNewRequestID(t *testing.T) {

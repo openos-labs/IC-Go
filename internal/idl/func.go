@@ -3,11 +3,12 @@ package idl
 import (
 	"bytes"
 	"fmt"
-	"github.com/stopWarByWar/ic-agent/internal/principal"
+
 	"math/big"
 	"strings"
 
 	"github.com/aviate-labs/leb128"
+	"github.com/mix-labs/IC-Go/internal/principal"
 )
 
 func encodeTypes(ts []Type, tdt *TypeDefinitionTable) ([]byte, error) {
