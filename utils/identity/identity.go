@@ -2,12 +2,17 @@ package identity
 
 import (
 	"crypto"
+	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
+	"encoding/pem"
 	"errors"
+	"fmt"
+	"io/ioutil"
 
 	"crypto/ed25519"
 )
+
 var errEd25519WrongID = errors.New("incorrect object identifier")
 var errEd25519WrongKeyType = errors.New("incorrect key type")
 
@@ -42,7 +47,6 @@ func MarshalEd25519PublicKey(pk crypto.PublicKey) ([]byte, error) {
 			Bytes:     pub,
 		},
 	}
-
 	return asn1.Marshal(spki)
 }
 
@@ -131,6 +135,48 @@ func ParseEd25519PrivateKey(der []byte) (crypto.PrivateKey, error) {
 	return ed25519.NewKeyFromSeed(*seed), nil
 }
 
+func ToPem(sk crypto.PrivateKey, path string) error {
+	var (
+		err   error
+		b     []byte
+		block *pem.Block
+		priv  ed25519.PrivateKey
+	)
+
+	priv, ok := sk.(ed25519.PrivateKey)
+	if !ok {
+		return errEd25519WrongKeyType
+	}
+	b, err = x509.MarshalPKCS8PrivateKey(priv)
+
+	block = &pem.Block{
+		Type:  "PRIVATE KEY",
+		Bytes: b,
+	}
+
+	err = ioutil.WriteFile(path, pem.EncodeToMemory(block), 0600)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func FromPem(file string) (ed25519.PrivateKey, error) {
+	b, err := ioutil.ReadFile(file)
+	if err != nil {
+		return nil, err
+	}
+	block, _ := pem.Decode(b)
+	if block.Type != "PRIVATE KEY" || block == nil {
+		return nil, fmt.Errorf("failed to decode PEM block containing private key")
+	}
+	sk, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, err
+	}
+	return sk.(ed25519.PrivateKey), nil
+}
+
 func New(anonymous bool, pkBytes []byte) *Identity {
 	if anonymous == true {
 		return &Identity{
@@ -140,9 +186,9 @@ func New(anonymous bool, pkBytes []byte) *Identity {
 	privKey := ed25519.NewKeyFromSeed(pkBytes)
 	//fmt.Println(privKey)
 	pubKey := privKey.Public()
-	
+
 	//fmt.Println(pubKey)
-	
+
 	return &Identity{
 		anonymous,
 		privKey,
@@ -157,14 +203,13 @@ type Identity struct {
 }
 
 func (identity *Identity) Sign(m []byte) ([]byte, error) {
-	
+
 	if identity.Anonymous == true {
 		return []byte{}, nil
 	}
-	
+
 	sign := ed25519.Sign(identity.PriKey, m[:])
-	
-	
+
 	return sign, nil
 }
 
@@ -172,7 +217,7 @@ func (identity *Identity) PubKeyBytes() []byte {
 	var senderPubKey []byte
 	if identity.Anonymous == false {
 		pkBytes, _ := MarshalEd25519PublicKey(identity.PubKey)
-		
+
 		return pkBytes
 	}
 	return senderPubKey
