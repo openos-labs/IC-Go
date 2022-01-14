@@ -18,6 +18,37 @@ type Agent struct {
 	rootKey       []byte //ICP root identity
 }
 
+func NewFromPem(anonymous bool, pemPath string) (*Agent, error) {
+	var id *identity.Identity
+	c := NewClient("https://ic0.app")
+	//todo:是否需要从ic拉取rootKey信息
+	status, _ := c.Status()
+
+	if anonymous == true {
+		id = &identity.Identity{
+			Anonymous: anonymous,
+		}
+	}
+	privKey, err := identity.FromPem(pemPath)
+	if err != nil {
+		return nil, err
+	}
+	pubKey := privKey.Public()
+
+	id = &identity.Identity{
+		anonymous,
+		privKey,
+		pubKey,
+	}
+	ingressExpiry := time.Second * 10
+	return &Agent{
+		client:        &c,
+		identity:      id,
+		ingressExpiry: ingressExpiry,
+		rootKey:       status.RootKey,
+	}, nil
+}
+
 func New(anonymous bool, privKey string) *Agent {
 	c := NewClient("https://ic0.app")
 	//todo:是否需要从ic拉取rootKey信息
@@ -84,7 +115,7 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	if err != nil {
 		return nil, nil, "", err
 	}
-	
+
 	resp, err := agent.queryEndpoint(canisterID, data)
 
 	if err != nil {
@@ -120,8 +151,7 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 	if err != nil {
 		return nil, nil, err
 	}
-	
-	
+
 	_, err = agent.callEndpoint(canisterID, *requestID, data)
 	if err != nil {
 		return nil, nil, err
@@ -175,10 +205,10 @@ func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Dura
 }
 
 func (agent *Agent) requestStatusRaw(canisterID string, requestId RequestID) ([]byte, []byte, error) {
-	
+
 	paths := [][][]byte{{[]byte("request_status"), requestId[:]}}
 	cert, err := agent.readStateRaw(canisterID, paths)
-	
+
 	if err != nil {
 		return nil, nil, err
 	}
@@ -204,9 +234,9 @@ func (agent *Agent) readStateRaw(canisterID string, paths [][][]byte) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
-	
+
 	result := map[string][]byte{}
-	
+
 	err = cbor.Unmarshal(resp, &result)
 	if err != nil {
 		return nil, err
