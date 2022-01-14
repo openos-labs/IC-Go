@@ -2,7 +2,9 @@ package agent
 
 import (
 	"encoding/hex"
+	"fmt"
 	"math/big"
+	"reflect"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
@@ -21,8 +23,33 @@ func TestAgent_QueryRaw(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	types, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-	t.Log("errMsg:", errMsg, "err:", err, "result:", result[0],"types:",types[0])
+	_, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
+
+	myresult := map[string]interface{}{}
+	//myresult["err"] = map[string]interface{}{"InvalidToken":"", "Other":""}
+	myresult["ok"] = 0
+
+	//fmt.Println(reflect.ValueOf(result[0]))
+
+	_result, ok := result[0].(*idl.FieldValue)
+	if !ok {
+		return
+	}
+
+
+	for key, _ := range(myresult) {
+		if idl.Hash(key).String() == _result.Name {
+			fmt.Println(reflect.TypeOf(_result.Value))
+			final_value, ok := _result.Value.(*big.Int)
+			if !ok {
+				fmt.Println("error type")
+				return
+			}
+			myresult[key] = final_value.Int64()
+		}
+
+	}
+	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult)
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
@@ -40,6 +67,9 @@ func TestAgent_UpdateRaw(t *testing.T) {
 
 	arg, _ := idl.Encode(argType, argValue)
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
+
+
+
 
 	t.Log("errMsg:", err, "result:", result[0])
 }
