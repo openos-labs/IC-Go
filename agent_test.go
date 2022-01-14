@@ -16,7 +16,7 @@ import (
 func TestAgent_QueryRaw(t *testing.T) {
 	canisterID := "bzsui-sqaaa-aaaah-qce2a-cai"
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	agent,err := NewFromPem(false,"/Users/panyeda/go/src/github.com/mix-labs/IC-Go/utils/identity/priv.pem")
+	agent,err := NewFromPem(false,"./utils/identity/priv.pem")
 	if err != nil{
 		t.Log(err)
 	}
