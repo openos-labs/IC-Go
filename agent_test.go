@@ -6,9 +6,9 @@ import (
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/mix-labs/IC-Go/internal/identity"
-	"github.com/mix-labs/IC-Go/internal/idl"
-	"github.com/mix-labs/IC-Go/internal/principal"
+	"github.com/mix-labs/IC-Go/utils/identity"
+	"github.com/mix-labs/IC-Go/utils/idl"
+	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
 func TestAgent_QueryRaw(t *testing.T) {
@@ -21,8 +21,8 @@ func TestAgent_QueryRaw(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-	t.Log("errMsg:", errMsg, "err:", err, "result:", result[0])
+	types, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
+	t.Log("errMsg:", errMsg, "err:", err, "result:", result[0],"types:",types[0])
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
@@ -40,7 +40,7 @@ func TestAgent_UpdateRaw(t *testing.T) {
 
 	arg, _ := idl.Encode(argType, argValue)
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
-	
+
 	t.Log("errMsg:", err, "result:", result[0])
 }
 

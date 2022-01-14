@@ -32,8 +32,8 @@ func TestFromPem(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	privKey := ed25519.NewKeyFromSeed(pkBytes)
 	priv, _ := FromPem("./priv.pem")
+	t.Log(hex.EncodeToString(priv.Seed()))
 	if priv.Equal(privKey) {
 		fmt.Println("pass test")
 	}
-
 }
