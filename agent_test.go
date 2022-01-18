@@ -3,12 +3,12 @@ package agent
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/mix-labs/IC-Go/utils/identity"
 	"math/big"
 	"reflect"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/mix-labs/IC-Go/utils/identity"
 	"github.com/mix-labs/IC-Go/utils/idl"
 	"github.com/mix-labs/IC-Go/utils/principal"
 )
@@ -71,11 +71,40 @@ func TestAgent_UpdateRaw(t *testing.T) {
 
 	arg, _ := idl.Encode(argType, argValue)
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
-
-
-
-
 	t.Log("errMsg:", err, "result:", result[0])
+}
+
+func TestAgent_GetCanisterController(t *testing.T) {
+	canisterID := "tviwd-niaaa-aaaaf-qaaaa-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	controllersBytes, err := agent.GetCanisterControllers(canisterID)
+	if err != nil{
+		t.Log(err)
+	}
+	for _, controllerBytes := range controllersBytes{
+		controller := principal.New(controllerBytes).Encode()
+		t.Log("controller:",controller)
+	}
+}
+
+func TestAgent_GetCanisterInfo_ModuleHash(t *testing.T) {
+	canisterID := "krnha-raaaa-aaaaf-qac5q-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	moduleHash, err := agent.GetCanisterModuleHash(canisterID)
+	if err != nil{
+		t.Log(err)
+	}
+	t.Log("module_hash:",hex.EncodeToString(moduleHash))
+}
+
+func TestAgent_GetCanisterSubnet(t *testing.T) {
+	canisterID := "krnha-raaaa-aaaaf-qac5q-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	subnet, err := agent.GetCanisterSubnet(canisterID)
+	if err != nil{
+		t.Log(err)
+	}
+	t.Log("subnet:",hex.EncodeToString(subnet))
 }
 
 func TestPrincipal(t *testing.T) {

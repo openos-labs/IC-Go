@@ -264,3 +264,77 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 	}
 	return &requestID, marshaledEnvelope, nil
 }
+
+//func (agent *Agent) GetStatus(canisterID string) ([]byte,error){
+//	info, err := agent.getCanisterMetadata(canisterID, "status")
+//	if err != nil {
+//		return nil, err
+//	}
+//	return info, nil
+//}
+//
+//
+//func (agent *Agent) getCanisterMetadata(canisterID, subPath string) ([]byte, error) {
+//	canisterBytes, _ := principal.Decode(canisterID)
+//	paths := [][][]byte{{[]byte("canister"), canisterBytes,[]byte("metadata"),[]byte(subPath)}}
+//	cert, err := agent.readStateRaw(canisterID, paths)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	path := [][]byte{[]byte("canister"), canisterBytes, []byte("metadata"),[]byte(subPath)}
+//	return LookUp(path, cert)
+//}
+
+func (agent *Agent) GetCanisterSubnet(canisterID string) ([]byte, error) {
+	paths := [][][]byte{{[]byte("subnet")}}
+	cert, err := agent.readStateRaw(canisterID, paths)
+
+	if err != nil {
+		return nil, err
+	}
+	path := [][]byte{[]byte("subnet")}
+	info, err := LookUp(path, cert)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
+func (agent *Agent) GetCanisterControllers(canisterID string) ([][]byte, error) {
+
+	info, err := agent.getCanisterInfo(canisterID, "controllers")
+	if err != nil {
+		return nil, err
+	}
+	result := [][]byte{}
+	err = cbor.Unmarshal(info, &result)
+	if err != nil {
+		return nil, err
+	}
+	return result, nil
+}
+
+func (agent *Agent) GetCanisterModuleHash(canisterID string) ([]byte, error) {
+	info, err := agent.getCanisterInfo(canisterID, "module_hash")
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}
+
+func (agent *Agent) getCanisterInfo(canisterID, subPath string) ([]byte, error) {
+	canisterBytes, _ := principal.Decode(canisterID)
+	paths := [][][]byte{{[]byte("canister"), canisterBytes, []byte(subPath)}}
+	cert, err := agent.readStateRaw(canisterID, paths)
+
+	if err != nil {
+		return nil, err
+	}
+	path := [][]byte{[]byte("canister"), canisterBytes, []byte(subPath)}
+	info, err := LookUp(path, cert)
+	if err != nil {
+		return nil, err
+	}
+	return info, nil
+}

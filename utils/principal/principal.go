@@ -14,6 +14,12 @@ var encoding = base32.StdEncoding.WithPadding(base32.NoPadding)
 // AnonymousID is used for the anonymous caller. It can be used in call and query requests without a signature.
 var AnonymousID = Principal([]byte{0x04})
 
+func New(a []byte) Principal {
+	principal := Principal{}
+	principal = append(principal, a...)
+	return principal
+}
+
 // NewSelfAuthenticating returns a self authenticating principal identifier based on the given public key.
 func NewSelfAuthenticating(pub []byte) Principal {
 	hash := sha256.Sum224(pub)
