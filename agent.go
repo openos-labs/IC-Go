@@ -286,20 +286,20 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 //	return LookUp(path, cert)
 //}
 
-func (agent *Agent) GetCanisterSubnet(canisterID string) ([]byte, error) {
-	paths := [][][]byte{{[]byte("subnet")}}
-	cert, err := agent.readStateRaw(canisterID, paths)
-
-	if err != nil {
-		return nil, err
-	}
-	path := [][]byte{[]byte("subnet")}
-	info, err := LookUp(path, cert)
-	if err != nil {
-		return nil, err
-	}
-	return info, nil
-}
+//func (agent *Agent) GetCanisterSubnet(canisterID string) ([]byte, error) {
+//	paths := [][][]byte{{[]byte("subnet")}}
+//	cert, err := agent.readStateRaw(canisterID, paths)
+//
+//	if err != nil {
+//		return nil, err
+//	}
+//	path := [][]byte{[]byte("subnet")}
+//	info, err := LookUp(path, cert)
+//	if err != nil {
+//		return nil, err
+//	}
+//	return info, nil
+//}
 
 func (agent *Agent) GetCanisterControllers(canisterID string) ([][]byte, error) {
 
