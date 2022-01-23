@@ -48,18 +48,18 @@ func TestAgent_QueryRaw(t *testing.T) {
 		t.Log(err)
 	}
 	//methodName := "supply"
-	//methodName := "listings"
-	methodName := "getRegistry"
+	methodName := "listings"
+	//methodName := "getRegistry"
 
 
-	arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
-	//arg, err := idl.Encode([]idl.Type{new(idl.Text)}, []interface{}{"Motoko"})
+	//arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
+	arg, err := idl.Encode([]idl.Type{new(idl.Text)}, []interface{}{"Motoko"})
 	if err != nil {
 		t.Error(err)
 	}
 	Type, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-	myresult := Registrys{}
-	//myresult := listings{}
+	//myresult := Registrys{}
+	myresult := listings{}
 	//myresult := supply{}
 	Decode(&myresult, result[0])
 	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult, "type:", Type)

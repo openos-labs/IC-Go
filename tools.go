@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"fmt"
 	"math/big"
 	"reflect"
 
@@ -61,7 +60,6 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 		sourceFiled := source_.Uint64()
 		target.Elem().SetUint(sourceFiled)
 	} else if targetType.Kind() == reflect.Slice {
-		fmt.Println(targetType.Name())
 		if targetType.Name() == "Principal" {
 			sourceFiled := source.([]uint8)
 			target.Elem().SetBytes(sourceFiled)
