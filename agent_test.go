@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
+	utils "github.com/mix-labs/IC-Go/utils"
 	"github.com/mix-labs/IC-Go/utils/identity"
 	"github.com/mix-labs/IC-Go/utils/idl"
 	"github.com/mix-labs/IC-Go/utils/principal"
@@ -61,7 +62,7 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//myresult := Registrys{}
 	myresult := listings{}
 	//myresult := supply{}
-	Decode(&myresult, result[0])
+	utils.Decode(&myresult, result[0])
 	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult, "type:", Type)
 }
 
