@@ -42,9 +42,14 @@ func (o Opt) Decode(r *bytes.Reader) (interface{}, error) {
 	}
 	switch l {
 	case 0x00:
-		return nil, nil
+		return map[string]interface{}{"none":1}, nil
 	case 0x01:
-		return o.Type.Decode(r)
+		v, err := o.Type.Decode(r)
+		if err != nil {
+			return nil, err
+		}
+		return map[string]interface{}{"some":v}, nil
+		//return o.Type.Decode(r)
 	default:
 		return nil, fmt.Errorf("invalid option value")
 	}

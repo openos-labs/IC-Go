@@ -2,9 +2,7 @@ package agent
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/big"
-	"reflect"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
@@ -13,47 +11,58 @@ import (
 	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
+
+
+
+type supply struct {
+	Ok uint64 `ic:"ok"`
+	Err string	`ic:"err"`
+}
+type Time struct {
+	Some big.Int	`ic:"some"`
+	None uint8	`ic:"none"`
+}
+type listing struct {
+	Locked Time `ic:locked`
+	Price uint64 `ic:"price"`
+	Seller principal.Principal `ic:"seller"`
+}
+type listingTuple struct {
+	A uint32 `ic:"0"`
+	B listing `ic:"1"`
+}
+type listings []listingTuple
+
+type TokenIndex uint32
+type RegistryTuple struct {
+	A TokenIndex `ic:"0"`
+	B string `ic:"1"`
+}
+type Registrys []RegistryTuple
 func TestAgent_QueryRaw(t *testing.T) {
 	canisterID := "bzsui-sqaaa-aaaah-qce2a-cai"
+	
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	agent,err := NewFromPem(false,"./utils/identity/priv.pem")
 	if err != nil{
 		t.Log(err)
 	}
-	methodName := "supply"
+	//methodName := "supply"
 	//methodName := "listings"
-	//arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
-	arg, err := idl.Encode([]idl.Type{new(idl.Text)}, []interface{}{"Motoko"})
+	methodName := "getRegistry"
+
+
+	arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
+	//arg, err := idl.Encode([]idl.Type{new(idl.Text)}, []interface{}{"Motoko"})
 	if err != nil {
 		t.Error(err)
 	}
-	_, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-
-	myresult := map[string]interface{}{}
-	//myresult["err"] = map[string]interface{}{"InvalidToken":"", "Other":""}
-	myresult["ok"] = 0
-
-	//fmt.Println(reflect.ValueOf(result[0]))
-
-	_result, ok := result[0].(*idl.FieldValue)
-	if !ok {
-		return
-	}
-
-
-	for key, _ := range(myresult) {
-		if idl.Hash(key).String() == _result.Name {
-			fmt.Println(reflect.TypeOf(_result.Value))
-			final_value, ok := _result.Value.(*big.Int)
-			if !ok {
-				fmt.Println("error type")
-				return
-			}
-			myresult[key] = final_value.Int64()
-		}
-
-	}
-	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult)
+	Type, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
+	myresult := Registrys{}
+	//myresult := listings{}
+	//myresult := supply{}
+	Decode(&myresult, result[0])
+	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult, "type:", Type)
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
