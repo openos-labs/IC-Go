@@ -77,11 +77,26 @@ func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &FieldValue{
-		Name:  v.Fields[int(id.Int64())].Name,
-		Value: v_,
-	}, nil
+	return map[string]interface{}{v.Fields[int(id.Int64())].Name:v_, "EnumIndex":v.Fields[int(id.Int64())].Name}, nil
 }
+
+// func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
+// 	id, err := leb128.DecodeUnsigned(r)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	if id.Cmp(big.NewInt(int64(len(v.Fields)))) >= 0 {
+// 		return nil, fmt.Errorf("invalid variant index: %v", id)
+// 	}
+// 	v_, err := v.Fields[int(id.Int64())].Type.Decode(r)
+// 	if err != nil {
+// 		return nil, err
+// 	}
+// 	return &FieldValue{
+// 		Name:  v.Fields[int(id.Int64())].Name,
+// 		Value: v_,
+// 	}, nil
+// }
 
 func (v Variant) EncodeType(tdt *TypeDefinitionTable) ([]byte, error) {
 	idx, ok := tdt.Indexes[v.String()]

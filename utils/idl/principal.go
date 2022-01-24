@@ -28,7 +28,7 @@ func (t *Principal) Decode(r *bytes.Reader) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	pid := make(principal.Principal, l.Int64())
+	pid := make([]byte, l.Int64())
 	n, err := r.Read(pid)
 	if err != nil {
 		return nil, err
