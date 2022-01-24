@@ -77,7 +77,7 @@ func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{v.Fields[int(id.Int64())].Name:v_}, nil
+	return map[string]interface{}{v.Fields[int(id.Int64())].Name:v_, "Index":v.Fields[int(id.Int64())].Name}, nil
 }
 
 // func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {

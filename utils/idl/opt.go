@@ -42,7 +42,7 @@ func (o Opt) Decode(r *bytes.Reader) (interface{}, error) {
 	}
 	switch l {
 	case 0x00:
-		return map[string]interface{}{"none":1}, nil
+		return map[string]interface{}{"none":big.NewInt(1)}, nil
 	case 0x01:
 		v, err := o.Type.Decode(r)
 		if err != nil {

@@ -3,6 +3,7 @@ package utils
 import (
 	"math/big"
 	"reflect"
+	"unsafe"
 
 	"github.com/mix-labs/IC-Go/utils/idl"
 )
@@ -19,34 +20,39 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 	if targetType.Kind() == reflect.Struct {
 		if targetType.Name() == "Int" {
 			value := source.(*big.Int)
-			ptarget := target.Addr().Interface().(*big.Int)
-			*ptarget = *value
+			ptarget := (*big.Int)(unsafe.Pointer(target.Elem().UnsafeAddr()))
+			ptarget.Set(value)
 			return
 		}
-		//source_ := source.(*idl.FieldValue)
+		
 		sourceField := source.(map[string]interface{})
 
 		for k, v := range(sourceField) {
 			for i := 0; i < targetType.NumField(); i++ {
 				targetFiledType := targetType.Field(i)
-				//a := targetFiledType.Tag.Get("ic")
-				//fmt.Println(a)
+				
 				if idl.Hash(targetFiledType.Tag.Get("ic")).String() == k {
 					targetFiledValue := target.Elem().Field(i)		
 					_Decode(targetFiledValue.Addr(), targetFiledType.Type, v)
+					break
 				}
-			}
-		}
-		for k, v := range(sourceField) {
-			for i := 0; i < targetType.NumField(); i++ {
-				targetFiledType := targetType.Field(i)
-				//a := targetFiledType.Tag.Get("ic")
-				//fmt.Println(a)
+
 				if targetFiledType.Tag.Get("ic") == k {
-					targetFiledValue := target.Elem().Field(i)		
+					targetFiledValue := target.Elem().Field(i)	
+					if k == "Index" {
+						//to solve enum struct
+						for j := 0; j < targetType.NumField(); j++ {
+							labelFiledType := targetType.Field(j)
+							if idl.Hash(labelFiledType.Tag.Get("ic")).String() == v.(string) {
+								targetFiledValue.SetString(labelFiledType.Tag.Get("ic"))						
+							}
+						}
+						continue
+					}
+						
 					_Decode(targetFiledValue.Addr(), targetFiledType.Type, v)
 				}
-			}
+			}		
 		}
 	} else if targetType.Kind() == reflect.String {
 		sourceFiled := source.(string)
