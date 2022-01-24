@@ -264,3 +264,38 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 	}
 	return &requestID, marshaledEnvelope, nil
 }
+
+func (agent *Agent) GetCanisterControllers(canisterID string) ([]principal.Principal, error) {
+	info, err := agent.getCanisterInfo(canisterID, "controllers")
+	if err != nil {
+		return nil, err
+	}
+	var mResult [][]byte
+	var result []principal.Principal
+	err = cbor.Unmarshal(info, &mResult)
+	if err != nil {
+		return nil, err
+	}
+	for _, p := range mResult {
+		result = append(result, principal.New(p))
+	}
+	return result, nil
+}
+
+func (agent *Agent) GetCanisterModule(canisterID string) ([]byte, error) {
+	return agent.getCanisterInfo(canisterID, "module_hash")
+}
+
+func (agent Agent) getCanisterInfo(canisterID, subPath string) ([]byte, error) {
+	canisterBytes, err := principal.Decode(canisterID)
+	if err != nil {
+		return nil, err
+	}
+	paths := [][][]byte{{[]byte("canister"), canisterBytes, []byte(subPath)}}
+	cert, err := agent.readStateRaw(canisterID, paths)
+	if err != nil {
+		return nil, err
+	}
+	path := [][]byte{[]byte("canister"), canisterBytes, []byte(subPath)}
+	return LookUp(path, cert)
+}

@@ -23,6 +23,14 @@ func NewSelfAuthenticating(pub []byte) Principal {
 // Principal are generic identifiers for canisters, users and possibly other concepts in the future.
 type Principal []byte
 
+// New new principal from bytes
+func New(b []byte) Principal {
+	p := Principal{}
+	p = append(p,b...)
+	return p
+}
+
+
 // Decode converts a textual representation into a principal.
 func Decode(s string) (Principal, error) {
 	s = strings.ReplaceAll(s, "-", "")

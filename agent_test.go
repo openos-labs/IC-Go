@@ -141,6 +141,30 @@ func TestAgent_UpdateRaw(t *testing.T) {
 	t.Log("errMsg:", err, "result:", result[0])
 }
 
+func TestAgent_GetCanisterModule(t *testing.T) {
+	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	result,err := agent.GetCanisterModule(canisterID)
+	if err != nil{
+		t.Log("err:",err)
+	} else {
+		t.Log("hash:",hex.EncodeToString(result))
+	}
+}
+
+func TestAgent_GetCanisterControllers(t *testing.T) {
+	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	result,err := agent.GetCanisterControllers(canisterID)
+	if err != nil{
+		t.Log("err:",err)
+	} else {
+		for _,i := range result{
+			t.Log("controller:",i.Encode())
+		}
+	}
+}
+
 func TestPrincipal(t *testing.T) {
 	pkBytes, _ := hex.DecodeString("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	identity := identity.New(false, pkBytes)
