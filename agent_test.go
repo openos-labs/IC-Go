@@ -63,7 +63,7 @@ type Operation struct{
 	Transfer NULL `ic:"transfer"`
 
 	//To formulate a enum struct
-	Index string `ic:"Index"`
+	Index string `ic:"EnumIndex"`
 }
 
 type transaction struct {

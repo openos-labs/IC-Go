@@ -39,7 +39,7 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 
 				if targetFiledType.Tag.Get("ic") == k {
 					targetFiledValue := target.Elem().Field(i)	
-					if k == "Index" {
+					if k == "EnumIndex" {
 						//to solve enum struct
 						for j := 0; j < targetType.NumField(); j++ {
 							labelFiledType := targetType.Field(j)
