@@ -2,7 +2,6 @@ package agent
 
 import (
 	"encoding/hex"
-	"fmt"
 	"math/big"
 	"testing"
 
@@ -106,14 +105,14 @@ func TestAgent_QueryRaw(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	Type, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
+	Type, result, errMsg, err := agent.Query(canisterID, methodName, arg)
 	
 	//myresult := supply{}
 	//myresult := listings{}
 	//myresult := Registrys{}
 
 	myresult := transaction{}
-	fmt.Println(result[0])
+	//fmt.Println(result[0])
 	utils.Decode(&myresult, result[0])
 
 	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult, "type:", Type)
@@ -133,10 +132,7 @@ func TestAgent_UpdateRaw(t *testing.T) {
 	argValue = append(argValue, big.NewInt(10000000000))
 
 	arg, _ := idl.Encode(argType, argValue)
-	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
-
-
-
+	_, result, err := agent.Update(canisterID, methodName, arg)
 
 	t.Log("errMsg:", err, "result:", result[0])
 }

@@ -98,10 +98,22 @@ func (agent *Agent) readStateEndpoint(canisterID string, data []byte) ([]byte, e
 	return agent.client.readState(canisterID, data)
 }
 
-func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.Type, []interface{}, string, error) {
-	canisterIDPrincipal, err := principal.Decode(canisterID)
+func (agent *Agent) Query(canisterID, methodName string, arg []byte) ([]idl.Type, []interface{}, string, error) {
+	resp, ErrMsg, err := agent.QueryRaw(canisterID, methodName, arg)
 	if err != nil {
 		return nil, nil, "", err
+	}
+	types, values, err := idl.Decode(resp)
+	if err != nil {
+		return nil, nil, "", err
+	}
+	return types, values, ErrMsg, nil
+}
+
+func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]byte, string, error) {
+	canisterIDPrincipal, err := principal.Decode(canisterID)
+	if err != nil {
+		return nil, "", err
 	}
 	req := Request{
 		Type:          RequestTypeQuery,
@@ -113,30 +125,39 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]idl.T
 	}
 	_, data, err := agent.signRequest(req)
 	if err != nil {
-		return nil, nil, "", err
+		return nil, "", err
 	}
 
 	resp, err := agent.queryEndpoint(canisterID, data)
 
 	if err != nil {
-		return nil, nil, "", err
+		return nil, "", err
 	}
 	if resp.Status == "replied" {
-		types, values, err := idl.Decode(resp.Reply["arg"])
-		if err != nil {
-			return nil, nil, "", err
-		}
-		return types, values, "", nil
+
+		return resp.Reply["arg"], "", nil
 	} else if resp.Status == "rejected" {
-		return nil, nil, resp.RejectMsg, nil
+		return nil, resp.RejectMsg, nil
 	}
-	return nil, nil, "", nil
+	return nil, "", err
 }
 
-func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.Type, []interface{}, error) {
-	canisterIDPrincipal, err := principal.Decode(canisterID)
+func (agent *Agent) Update(canisterID, methodName string, arg []byte) ([]idl.Type, []interface{}, error) {
+	resp, err := agent.UpdateRaw(canisterID, methodName, arg)
 	if err != nil {
 		return nil, nil, err
+	}
+	types, values, err := idl.Decode(resp)
+	if err != nil {
+		return nil, nil, err
+	}
+	return types, values, nil
+}
+
+func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]byte, error) {
+	canisterIDPrincipal, err := principal.Decode(canisterID)
+	if err != nil {
+		return nil, err
 	}
 	req := Request{
 		Type:          RequestTypeCall,
@@ -149,24 +170,17 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]idl.
 
 	requestID, data, err := agent.signRequest(req)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	_, err = agent.callEndpoint(canisterID, *requestID, data)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	//poll requestID to get result
 	//todo:这个时间写成配置之后
-	result, err := agent.poll(canisterID, *requestID, time.Second, time.Second*10)
-	if err != nil {
-		return nil, nil, err
-	}
-	types, values, err := idl.Decode(result)
-	if err != nil {
-		return nil, nil, err
-	}
-	return types, values, nil
+	return agent.poll(canisterID, *requestID, time.Second, time.Second*10)
+
 }
 
 func (agent *Agent) poll(canisterID string, requestID RequestID, delay time.Duration, timeout time.Duration) ([]byte, error) {
