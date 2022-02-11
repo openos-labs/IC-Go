@@ -119,22 +119,32 @@ func TestAgent_QueryRaw(t *testing.T) {
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
-	canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
-	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	// canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
+	// agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 
-	methodName := "transfer"
-	var argType []idl.Type
-	var argValue []interface{}
-	p, _ := principal.Decode("aaaaa-aa")
-	argType = append(argType, new(idl.Principal))
-	argType = append(argType, new(idl.Nat))
-	argValue = append(argValue, p)
-	argValue = append(argValue, big.NewInt(10000000000))
+	// methodName := "transfer"
+	// var argType []idl.Type
+	// var argValue []interface{}
+	// p, _ := principal.Decode("aaaaa-aa")
+	// argType = append(argType, new(idl.Principal))
+	// argType = append(argType, new(idl.Nat))
+	// argValue = append(argValue, p)
+	// argValue = append(argValue, big.NewInt(10000000000))
+	var myresult uint64
+	canisterID := "d24m2-dqaaa-aaaah-aa4zq-cai"
+	ag := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	methodName := "total"
+	arg, _ := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
+	_, result, err := ag.Update(canisterID, methodName, arg, 30)
+	if err != nil {
+		panic(err)
+	}
+	utils.Decode(&myresult, result[0])
 
-	arg, _ := idl.Encode(argType, argValue)
-	_, result, err := agent.Update(canisterID, methodName, arg)
+	// arg, _ := idl.Encode(argType, argValue)
+	// _, result, err := agent.Update(canisterID, methodName, arg)
 
-	t.Log("errMsg:", err, "result:", result[0])
+	t.Log("errMsg:", err, "result:", myresult)
 }
 
 func TestAgent_GetCanisterModule(t *testing.T) {

@@ -142,8 +142,8 @@ func (agent *Agent) QueryRaw(canisterID, methodName string, arg []byte) ([]byte,
 	return nil, "", err
 }
 
-func (agent *Agent) Update(canisterID, methodName string, arg []byte) ([]idl.Type, []interface{}, error) {
-	resp, err := agent.UpdateRaw(canisterID, methodName, arg)
+func (agent *Agent) Update(canisterID, methodName string, arg []byte, timeout uint64) ([]idl.Type, []interface{}, error) {
+	resp, err := agent.UpdateRaw(canisterID, methodName, arg, timeout)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -154,7 +154,7 @@ func (agent *Agent) Update(canisterID, methodName string, arg []byte) ([]idl.Typ
 	return types, values, nil
 }
 
-func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]byte, error) {
+func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte, timeout uint64) ([]byte, error) {
 	canisterIDPrincipal, err := principal.Decode(canisterID)
 	if err != nil {
 		return nil, err
@@ -179,7 +179,7 @@ func (agent *Agent) UpdateRaw(canisterID, methodName string, arg []byte) ([]byte
 	}
 	//poll requestID to get result
 	//todo:这个时间写成配置之后
-	return agent.poll(canisterID, *requestID, time.Second, time.Second*10)
+	return agent.poll(canisterID, *requestID, time.Second, time.Second*time.Duration(timeout))
 
 }
 
