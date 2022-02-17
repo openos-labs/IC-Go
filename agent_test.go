@@ -138,18 +138,20 @@ func TestAgent_UpdateRaw(t *testing.T) {
 }
 
 func TestAgent_GetCanisterModule(t *testing.T) {
-	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
+	canisterID := "tfuft-aqaaa-aaaaa-aaaoq-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	result,err := agent.GetCanisterModule(canisterID)
 	if err != nil{
 		t.Log("err:",err)
+	} else if result == nil{
+		t.Log("no module")
 	} else {
 		t.Log("hash:",hex.EncodeToString(result))
 	}
 }
 
 func TestAgent_GetCanisterControllers(t *testing.T) {
-	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
+	canisterID := "rwlgt-iiaaa-aaaaa-aaaaa-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	result,err := agent.GetCanisterControllers(canisterID)
 	if err != nil{
@@ -192,7 +194,7 @@ func TestCbor(t *testing.T) {
 	cbor.Unmarshal(data, resp)
 	t.Log("sender", resp.Content.Sender.Encode())
 	t.Log("type", resp.Content.Type)
-	t.Log("ingress expiry", resp.Content.IngressExpiry)
+	t.Log("ingress expiryt", resp.Content.IngressExpiry)
 	t.Log("method", resp.Content.MethodName)
 	t.Log("arg", resp.Content.Arguments)
 	t.Log("canister", resp.Content.CanisterID.Encode())
