@@ -148,7 +148,7 @@ func TestAgent_UpdateRaw(t *testing.T) {
 }
 
 func TestAgent_GetCanisterModule(t *testing.T) {
-	canisterID := "tfuft-aqaaa-aaaaa-aaaoq-cai"
+	canisterID := "bzsui-sqaaa-aaaah-qce2a-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	result,err := agent.GetCanisterModule(canisterID)
 	if err != nil{
@@ -161,7 +161,7 @@ func TestAgent_GetCanisterModule(t *testing.T) {
 }
 
 func TestAgent_GetCanisterControllers(t *testing.T) {
-	canisterID := "rwlgt-iiaaa-aaaaa-aaaaa-cai"
+	canisterID := "6b4pv-sqaaa-aaaah-qaava-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	result,err := agent.GetCanisterControllers(canisterID)
 	if err != nil{
@@ -171,6 +171,7 @@ func TestAgent_GetCanisterControllers(t *testing.T) {
 			t.Log("controller:",i.Encode())
 		}
 	}
+	t.Log(result)
 }
 
 func TestPrincipal(t *testing.T) {
@@ -208,4 +209,33 @@ func TestCbor(t *testing.T) {
 	t.Log("method", resp.Content.MethodName)
 	t.Log("arg", resp.Content.Arguments)
 	t.Log("canister", resp.Content.CanisterID.Encode())
+}
+
+func TestAgent_GetCanisterTime(t *testing.T) {
+	canisterID := "b65vx-3qaaa-aaaaa-7777q-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	result,err := agent.GetCanisterTime(canisterID)
+	if err != nil{
+		t.Log("err:",err)
+	} else {
+			t.Log("result:",result)
+
+	}
+}
+
+func TestAgent_GetCanisterCandid(t *testing.T) {
+	canisterID := "oeee4-qaaaa-aaaak-qaaeq-cai"
+	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	arg, _ := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
+	methodName := "__get_candid_interface_tmp_hack"
+	_, result, err := agent.Update(canisterID, methodName, arg, 30)
+	if err != nil {
+		panic(err)
+	}
+	if err != nil{
+		t.Log("err:",err)
+	} else {
+		t.Log("result:",result)
+
+	}
 }

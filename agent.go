@@ -280,7 +280,7 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 }
 
 func (agent *Agent) GetCanisterControllers(canisterID string) ([]principal.Principal, error) {
-	info, err := agent.getCanisterInfo(canisterID, "controllers")
+	info, err := agent.GetCanisterInfo(canisterID, "controllers")
 	if err != nil {
 		return nil, err
 	}
@@ -297,10 +297,10 @@ func (agent *Agent) GetCanisterControllers(canisterID string) ([]principal.Princ
 }
 
 func (agent *Agent) GetCanisterModule(canisterID string) ([]byte, error) {
-	return agent.getCanisterInfo(canisterID, "module_hash")
+	return agent.GetCanisterInfo(canisterID, "module_hash")
 }
 
-func (agent Agent) getCanisterInfo(canisterID, subPath string) ([]byte, error) {
+func (agent Agent) GetCanisterInfo(canisterID, subPath string) ([]byte, error) {
 	canisterBytes, err := principal.Decode(canisterID)
 	if err != nil {
 		return nil, err
@@ -311,5 +311,15 @@ func (agent Agent) getCanisterInfo(canisterID, subPath string) ([]byte, error) {
 		return nil, err
 	}
 	path := [][]byte{[]byte("canister"), canisterBytes, []byte(subPath)}
+	return LookUp(path, cert)
+}
+
+func (agent Agent) GetCanisterTime(canisterID string) ([]byte, error) {
+	paths := [][][]byte{{[]byte("time")}}
+	cert, err := agent.readStateRaw(canisterID, paths)
+	if err != nil {
+		return nil, err
+	}
+	path := [][]byte{[]byte("time")}
 	return LookUp(path, cert)
 }

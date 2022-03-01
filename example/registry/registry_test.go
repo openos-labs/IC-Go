@@ -25,8 +25,6 @@ func TestGetRoutingTable(t *testing.T) {
 		fmt.Println("end canister ID:", principal.New(entry.Range.EndCanisterId.PrincipalId.Raw).Encode())
 		fmt.Println("end canister ID raw:", entry.Range.EndCanisterId.PrincipalId.Raw)
 		fmt.Println("end canister ID to uint64:", binary.BigEndian.Uint64(entry.Range.EndCanisterId.PrincipalId.Raw[:8]))
-
-
 	}
 }
 
