@@ -166,6 +166,10 @@ func (f Func) String() string {
 	return fmt.Sprintf("(%s) -> (%s)%s", strings.Join(args, ", "), strings.Join(rets, ", "), ann)
 }
 
+func (Func) Fill(Type) {
+
+}
+
 type PrincipalMethod struct {
 	Principal principal.Principal
 	Method    string

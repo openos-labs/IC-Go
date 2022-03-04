@@ -42,13 +42,13 @@ func (o Opt) Decode(r *bytes.Reader) (interface{}, error) {
 	}
 	switch l {
 	case 0x00:
-		return map[string]interface{}{"none":big.NewInt(1)}, nil
+		return map[string]interface{}{"none": big.NewInt(1)}, nil
 	case 0x01:
 		v, err := o.Type.Decode(r)
 		if err != nil {
 			return nil, err
 		}
-		return map[string]interface{}{"some":v}, nil
+		return map[string]interface{}{"some": v}, nil
 		//return o.Type.Decode(r)
 	default:
 		return nil, fmt.Errorf("invalid option value")
@@ -72,6 +72,9 @@ func (o Opt) EncodeValue(v interface{}) ([]byte, error) {
 		return nil, err
 	}
 	return concat([]byte{0x01}, v_), nil
+}
+func (Opt) Fill(Type) {
+
 }
 
 func (o Opt) String() string {

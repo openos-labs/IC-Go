@@ -42,6 +42,8 @@ type Type interface {
 	// Encodes the value.
 	EncodeValue(v interface{}) ([]byte, error)
 
+	Fill(v Type)
+
 	fmt.Stringer
 }
 
@@ -108,4 +110,7 @@ func (primType) AddTypeDefinition(_ *TypeDefinitionTable) error {
 	return nil // No need to add primitive types to the type definition table.
 }
 
+func (primType) Fill(Type) {
+
+}
 func (primType) prim() {}

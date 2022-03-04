@@ -106,6 +106,10 @@ func (r Rec) EncodeValue(v interface{}) ([]byte, error) {
 	return vs, nil
 }
 
+func (Rec) Fill(Type) {
+
+}
+
 func (r Rec) String() string {
 	var s []string
 	for _, f := range r.Fields {

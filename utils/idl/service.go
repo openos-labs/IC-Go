@@ -114,6 +114,9 @@ func (s Service) EncodeValue(v interface{}) ([]byte, error) {
 	return concat([]byte{0x01}, l, []byte(p)), nil
 }
 
+func (Service) Fill(Type) {
+
+}
 func (s Service) String() string {
 	var methods []string
 	for _, m := range s.methods {
