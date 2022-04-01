@@ -217,7 +217,6 @@ func (identity *Identity) PubKeyBytes() []byte {
 	var senderPubKey []byte
 	if identity.Anonymous == false {
 		pkBytes, _ := MarshalEd25519PublicKey(identity.PubKey)
-
 		return pkBytes
 	}
 	return senderPubKey
