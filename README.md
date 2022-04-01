@@ -8,6 +8,8 @@ You can find the examples to use IC-Go in agent_test.go
 
 The implementations of IDL and principal are borrowed from [candid-go](https://github.com/aviate-labs/candid-go) and [principal](https://github.com/aviate-labs/principal-go), and fix the bugs
 
+**[update 2022.3.6]** fix the bugs for the recursive structs during decode, (like a struct A with a field which is a vec of A)
+
 **[update 2022.1.24]** add the auto-decoder to decode the result to the data structure in Golang automatically, see utils/decode.go
 
 	Tips for the auto-decoder:
@@ -21,6 +23,8 @@ The implementations of IDL and principal are borrowed from [candid-go](https://g
 	- "Tuple" is also defined as a struct, the tag for the first member in tuple should be `ic:"0"`, and so on.
 
     - "Nat" is also supposed to be defined as big.Int 
+  
+    - The type of members in record or enum without type of value in motoko should be set as a *uint8. The tag of members in record or enum without name in motoko should be set as `ic:"0"`, `ic:"1"` and so on.
 	
 	- See more details in utils/decode.go and agent_test.go
 

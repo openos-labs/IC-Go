@@ -82,3 +82,7 @@ func (v Vec) EncodeValue(value interface{}) ([]byte, error) {
 func (v Vec) String() string {
 	return fmt.Sprintf("vec %s", v.Type)
 }
+
+func (Vec) Fill(Type) {
+
+}

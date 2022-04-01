@@ -8,14 +8,13 @@ import (
 	"github.com/aviate-labs/leb128"
 )
 
-
 type typePair struct {
-	Type int64
+	Type         int64
 	single_value int64
-	pair_value [][]big.Int
+	pair_value   [][]big.Int
 }
 
-func _Decode(raw_table []typePair, index int64) (Type, error){
+func _Decode(raw_table []typePair, table []Type, index int64) (Type, error) {
 	pair := raw_table[index]
 	switch pair.Type {
 	case optType:
@@ -26,8 +25,8 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 			if int(tid) >= len(raw_table) {
 				return nil, nil
 			}
-			v, err = _Decode(raw_table, tid)
-		} else{
+			v = table[tid]
+		} else {
 			v, err = getType(tid)
 		}
 		if err != nil {
@@ -42,8 +41,8 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 			if int(tid) >= len(raw_table) {
 				return nil, nil
 			}
-			v, err = _Decode(raw_table, tid)
-		} else{
+			v = table[tid]
+		} else {
 			v, err = getType(tid)
 		}
 		if err != nil {
@@ -63,11 +62,11 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 				if int(tid.Int64()) >= len(raw_table) {
 					return nil, nil
 				}
-				v, err = _Decode(raw_table, tid.Int64())
-			} else{
+				v = table[tid.Int64()]
+			} else {
 				v, err = getType(tid.Int64())
 			}
-			
+
 			if err != nil {
 				return nil, err
 			}
@@ -89,11 +88,11 @@ func _Decode(raw_table []typePair, index int64) (Type, error){
 				if int(tid.Int64()) >= len(raw_table) {
 					return nil, nil
 				}
-				v, err = _Decode(raw_table, tid.Int64())
-			} else{
+				v = table[tid.Int64()]
+			} else {
 				v, err = getType(tid.Int64())
 			}
-			
+
 			if err != nil {
 				return nil, err
 			}
@@ -152,9 +151,9 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 					return nil, nil, err
 				}
 				raw_table = append(raw_table, typePair{
-					Type: tid.Int64(),
+					Type:         tid.Int64(),
 					single_value: t.Int64(),
-					pair_value: nil,
+					pair_value:   nil,
 				})
 			case vecType:
 				t, err := leb128.DecodeSigned(r)
@@ -162,9 +161,9 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 					return nil, nil, err
 				}
 				raw_table = append(raw_table, typePair{
-					Type: tid.Int64(),
+					Type:         tid.Int64(),
 					single_value: t.Int64(),
-					pair_value: nil,
+					pair_value:   nil,
 				})
 			case recType:
 				l, err := leb128.DecodeUnsigned(r)
@@ -184,11 +183,11 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 					fields = append(fields, []big.Int{*h, *t})
 				}
 				raw_table = append(raw_table, typePair{
-					Type: tid.Int64(),
+					Type:         tid.Int64(),
 					single_value: 99,
-					pair_value: fields,
-				})	
-			case varType:	
+					pair_value:   fields,
+				})
+			case varType:
 				l, err := leb128.DecodeUnsigned(r)
 				if err != nil {
 					return nil, nil, err
@@ -206,10 +205,10 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 					fields = append(fields, []big.Int{*h, *t})
 				}
 				raw_table = append(raw_table, typePair{
-					Type: tid.Int64(),
+					Type:         tid.Int64(),
 					single_value: 99,
-					pair_value: fields,
-				})	
+					pair_value:   fields,
+				})
 			case funcType:
 				//TODO
 				return nil, nil, nil
@@ -220,13 +219,17 @@ func Decode(bs []byte) ([]Type, []interface{}, error) {
 		}
 	}
 	var tds []Type
+	for _, _ = range raw_table {
+		tds = append(tds, &Interface{})
+	}
 	{ // T
-		for i, _ := range(raw_table){
-			t, err := _Decode(raw_table, int64(i))
+		for i, _ := range raw_table {
+			t, err := _Decode(raw_table, tds, int64(i))
+			tds[i].Fill(t)
 			if err != nil {
 				return nil, nil, err
 			}
-			tds = append(tds, t)
+
 		}
 	}
 

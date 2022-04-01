@@ -77,7 +77,7 @@ func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
 	if err != nil {
 		return nil, err
 	}
-	return map[string]interface{}{v.Fields[int(id.Int64())].Name:v_, "EnumIndex":v.Fields[int(id.Int64())].Name}, nil
+	return map[string]interface{}{v.Fields[int(id.Int64())].Name: v_, "EnumIndex": v.Fields[int(id.Int64())].Name}, nil
 }
 
 // func (v Variant) Decode(r *bytes.Reader) (interface{}, error) {
@@ -133,4 +133,8 @@ func (v Variant) String() string {
 		s = append(s, fmt.Sprintf("%s:%s", f.Name, f.Type.String()))
 	}
 	return fmt.Sprintf("variant {%s}", strings.Join(s, "; "))
+}
+
+func (Variant) Fill(Type) {
+
 }
