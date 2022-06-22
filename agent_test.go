@@ -114,27 +114,38 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
 
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	agent, err := NewFromPem(false, "./utils/identity/priv.pem")
-	if err != nil {
-		t.Log(err)
+	// agent, err := NewFromPem(false, "./utils/identity/priv.pem")
+	// if err != nil {
+	// 	t.Log(err)
+	// }
+
+	// canisterID := principal.Principal([]byte{0, 0, 0, 0, 0, 240, 17, 32, 1, 1}).Encode()
+
+	testRec := idl.NewRec(map[string]idl.Type{
+		"a": idl.NewVec(idl.Int32()),
+		"b": idl.NewVec(idl.Int32()),
+	})
+	testRecValue := map[string]interface{}{
+		"a":[]interface{}{},
+		"b":[]interface{}{},
 	}
+	
+	arg, _ := idl.Encode([]idl.Type{testRec}, []interface{}{testRecValue})
+	fmt.Println(arg)
+	// methodName := "get_transactions"
 
-	canisterID := principal.Principal([]byte{0, 0, 0, 0, 0, 240, 17, 32, 1, 1}).Encode()
+	// rec := map[string]idl.Type{}
+	// rec["page"] = idl.NewOpt(idl.Nat32())
+	// rec["witness"] = new(idl.Bool)
+	// value := map[string]interface{}{}
+	// value["page"] = big.NewInt(1)
+	// value["witness"] = false
 
-	methodName := "get_transactions"
-
-	rec := map[string]idl.Type{}
-	rec["page"] = idl.NewOpt(idl.Nat32())
-	rec["witness"] = new(idl.Bool)
-	value := map[string]interface{}{}
-	value["page"] = big.NewInt(1)
-	value["witness"] = false
-
-	arg, _ := idl.Encode([]idl.Type{idl.NewRec(rec)}, []interface{}{value})
-	fmt.Println(arg, canisterID, methodName)
-	_, result, errMsg, err := agent.Query(canisterID, methodName, arg)
-	myresult := GetTransactionsResponseBorrowed{}
-	utils.Decode(&myresult, result[0])
+	// arg, _ := idl.Encode([]idl.Type{idl.NewRec(rec)}, []interface{}{value})
+	// fmt.Println(arg, canisterID, methodName)
+	// _, result, errMsg, err := agent.Query(canisterID, methodName, arg)
+	// myresult := GetTransactionsResponseBorrowed{}
+	// utils.Decode(&myresult, result[0])
 	//fmt.Println(result)
 	//
 	////EXT method
@@ -160,8 +171,8 @@ func TestAgent_QueryRaw(t *testing.T) {
 	////fmt.Println(result[0])
 	//utils.Decode(&myresult, result[0])
 
-	t.Log("errMsg:", errMsg, "err:", err, "result:", myresult)
-	fmt.Println(myresult.Data[1])
+	// t.Log("errMsg:", errMsg, "err:", err, "result:", myresult)
+	// fmt.Println(myresult.Data[1])
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
