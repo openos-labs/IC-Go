@@ -38,18 +38,18 @@ func (c *Client) query(canisterId string, data []byte) ([]byte, error) {
 		fmt.Println("error:", err)
 		return nil, err
 	} else if resp.StatusCode != 200 {
-		fmt.Println(
-			"status:", resp.Status, "\n",
-			"StatusCode:", resp.StatusCode, "\n",
-			"Proto:", resp.Proto, "\n",
-			"ProtoMajor:", resp.ProtoMajor, "\n",
-			"ProtoMinor:", resp.ProtoMinor, "\n",
-			"Header:", resp.Header, "\n",
-			"Body:", resp.Body, "\n",
-			"ContentLength:", resp.ContentLength, "\n",
-			"TransferEncoding:", resp.TransferEncoding, "\n",
-			"Request:", resp.Request,
-		)
+		//fmt.Println(
+		//	"status:", resp.Status, "\n",
+		//	"StatusCode:", resp.StatusCode, "\n",
+		//	"Proto:", resp.Proto, "\n",
+		//	"ProtoMajor:", resp.ProtoMajor, "\n",
+		//	"ProtoMinor:", resp.ProtoMinor, "\n",
+		//	"Header:", resp.Header, "\n",
+		//	"Body:", resp.Body, "\n",
+		//	"ContentLength:", resp.ContentLength, "\n",
+		//	"TransferEncoding:", resp.TransferEncoding, "\n",
+		//	"Request:", resp.Request,
+		//)
 		return nil, fmt.Errorf("fail to post ic with status: %v", resp.Status)
 	}
 	defer resp.Body.Close()
