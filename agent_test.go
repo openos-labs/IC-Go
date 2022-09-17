@@ -111,8 +111,8 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//canisterID := "bzsui-sqaaa-aaaah-qce2a-cai"
 
 	//PUNK canister
-	//canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
-
+	// canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
+	agent := New(true, "")
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	// agent, err := NewFromPem(false, "./utils/identity/priv.pem")
 	// if err != nil {
@@ -121,17 +121,17 @@ func TestAgent_QueryRaw(t *testing.T) {
 
 	// canisterID := principal.Principal([]byte{0, 0, 0, 0, 0, 240, 17, 32, 1, 1}).Encode()
 
-	testRec := idl.NewRec(map[string]idl.Type{
-		"a": idl.NewVec(idl.Int32()),
-		"b": idl.NewVec(idl.Int32()),
-	})
-	testRecValue := map[string]interface{}{
-		"a":[]interface{}{},
-		"b":[]interface{}{},
-	}
+	// testRec := idl.NewRec(map[string]idl.Type{
+	// 	"a": idl.NewVec(idl.Int32()),
+	// 	"b": idl.NewVec(idl.Int32()),
+	// })
+	// testRecValue := map[string]interface{}{
+	// 	"a":[]interface{}{},
+	// 	"b":[]interface{}{},
+	// }
 	
-	arg, _ := idl.Encode([]idl.Type{testRec}, []interface{}{testRecValue})
-	fmt.Println(arg)
+	// arg, _ := idl.Encode([]idl.Type{testRec}, []interface{}{testRecValue})
+	// fmt.Println(arg)
 	// methodName := "get_transactions"
 
 	// rec := map[string]idl.Type{}
@@ -149,7 +149,7 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//fmt.Println(result)
 	//
 	////EXT method
-	////methodName := "supply"
+	// methodName := "supply"
 	////methodName := "listings"
 	////methodName := "getRegistry"
 	//
@@ -161,7 +161,7 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//if err != nil {
 	//	t.Error(err)
 	//}
-	//Type, result, errMsg, err := agent.Query(canisterID, methodName, arg)
+	// Type, result, errMsg, err := agent.Query(canisterID, methodName, arg)
 	//
 	////myresult := supply{}
 	////myresult := listings{}
@@ -173,6 +173,15 @@ func TestAgent_QueryRaw(t *testing.T) {
 
 	// t.Log("errMsg:", errMsg, "err:", err, "result:", myresult)
 	// fmt.Println(myresult.Data[1])
+
+	methodName := "getAllToken"
+	canister := "cuvse-myaaa-aaaan-qas6a-cai"
+	arg, _ := idl.Encode([]idl.Type{idl.NewOpt(new(idl.Nat))}, []interface{}{nil})
+	_, result, _, err := agent.Query(canister, methodName, arg)
+	if err != nil {
+		panic(err)
+	}
+	fmt.Println(result[0])
 }
 
 func TestAgent_UpdateRaw(t *testing.T) {
