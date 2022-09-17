@@ -65,6 +65,10 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 		source_ := source.(*big.Int)
 		sourceFiled := source_.Uint64()
 		target.Elem().SetUint(sourceFiled)
+	} else if targetType.Kind() == reflect.Float32 || targetType.Kind() == reflect.Float64 {
+		source_ := source.(*big.Float)
+		sourceFiled, _ := source_.Float64()
+		target.Elem().SetFloat(sourceFiled)
 	} else if targetType.Kind() == reflect.Slice {
 		if targetType.Name() == "Principal" {
 			sourceFiled := source.([]uint8)
