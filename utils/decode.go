@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"unsafe"
 
-	"github.com/mix-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/idl"
 )
 
 

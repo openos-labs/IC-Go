@@ -2,9 +2,10 @@ package registry
 
 import (
 	"errors"
+
 	"github.com/golang/protobuf/proto"
-	agent "github.com/mix-labs/IC-Go"
-	"github.com/mix-labs/IC-Go/example/registry/proto/pb"
+	agent "github.com/openos-labs/IC-Go"
+	"github.com/openos-labs/IC-Go/example/registry/proto/pb"
 )
 
 const CanisterId = "rwlgt-iiaaa-aaaaa-aaaaa-cai"

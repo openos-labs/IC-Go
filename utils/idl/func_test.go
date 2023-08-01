@@ -1,8 +1,8 @@
 package idl_test
 
 import (
-	"github.com/mix-labs/IC-Go/utils/idl"
-	"github.com/mix-labs/IC-Go/utils/principal"
+	"github.com/openos-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/principal"
 )
 
 func ExampleFunc() {

@@ -6,9 +6,9 @@ import (
 	"time"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/mix-labs/IC-Go/utils/identity"
-	"github.com/mix-labs/IC-Go/utils/idl"
-	"github.com/mix-labs/IC-Go/utils/principal"
+	"github.com/openos-labs/IC-Go/utils/identity"
+	"github.com/openos-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/principal"
 )
 
 type Agent struct {

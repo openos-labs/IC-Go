@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/mix-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/idl"
 )
 
 func TestHash(t *testing.T) {

@@ -3,7 +3,7 @@ package idl_test
 import (
 	"math/big"
 
-	"github.com/mix-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/idl"
 )
 
 func ExampleInt() {

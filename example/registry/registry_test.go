@@ -3,9 +3,10 @@ package registry
 import (
 	"encoding/binary"
 	"fmt"
-	agent "github.com/mix-labs/IC-Go"
-	"github.com/mix-labs/IC-Go/utils/principal"
 	"testing"
+
+	agent "github.com/openos-labs/IC-Go"
+	"github.com/openos-labs/IC-Go/utils/principal"
 )
 
 func TestGetRoutingTable(t *testing.T) {
