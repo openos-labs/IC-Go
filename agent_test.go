@@ -3,17 +3,17 @@ package agent
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/openos-labs/IC-Go/utils"
+	"math"
 	"math/big"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/openos-labs/IC-Go/utils"
-	"github.com/openos-labs/IC-Go/utils/identity"
 	"github.com/openos-labs/IC-Go/utils/idl"
 	"github.com/openos-labs/IC-Go/utils/principal"
 )
 
-//EXT data structure
+// EXT data structure
 type supply struct {
 	Ok  uint64 `ic:"ok"`
 	Err string `ic:"err"`
@@ -40,7 +40,7 @@ type RegistryTuple struct {
 }
 type Registrys []RegistryTuple
 
-//PUNK data structure
+// PUNK data structure
 type principalOp struct {
 	Some principal.Principal `ic:"some"`
 	None uint8               `ic:"none"`
@@ -112,7 +112,8 @@ func TestAgent_QueryRaw(t *testing.T) {
 
 	//PUNK canister
 	// canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
-	agent := New(true, "")
+
+	agent := New(true, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
 	// agent, err := NewFromPem(false, "./utils/identity/priv.pem")
 	// if err != nil {
@@ -129,7 +130,7 @@ func TestAgent_QueryRaw(t *testing.T) {
 	// 	"a":[]interface{}{},
 	// 	"b":[]interface{}{},
 	// }
-	
+
 	// arg, _ := idl.Encode([]idl.Type{testRec}, []interface{}{testRecValue})
 	// fmt.Println(arg)
 	// methodName := "get_transactions"
@@ -184,33 +185,61 @@ func TestAgent_QueryRaw(t *testing.T) {
 	fmt.Println(result[0])
 }
 
-func TestAgent_UpdateRaw(t *testing.T) {
-	// canisterID := "gvbup-jyaaa-aaaah-qcdwa-cai"
-	// agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+type ICError struct {
+	Internal                string `ic:"Internal"`
+	ValidatorError          *uint8 `ic:"ValidatorError"`
+	VotActOwnerPubTypeError *uint8 `ic:"VotActOwnerPubTypeError"`
+	TemplateNotExist        *uint8 `ic:"TemplateNotExist"`
+	TemplateJsonError       *uint8 `ic:"TemplateJsonError"`
+	NotAuthorized           *uint8 `ic:"NotAuthorized"`
+	StableError             string `ic:"StableError"`
 
-	// methodName := "transfer"
-	// var argType []idl.Type
-	// var argValue []interface{}
-	// p, _ := principal.Decode("aaaaa-aa")
-	// argType = append(argType, new(idl.Principal))
-	// argType = append(argType, new(idl.Nat))
-	// argValue = append(argValue, p)
-	// argValue = append(argValue, big.NewInt(10000000000))
-	var myresult uint64
-	canisterID := "d24m2-dqaaa-aaaah-aa4zq-cai"
-	ag := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	methodName := "total"
-	arg, _ := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
-	_, result, err := ag.Update(canisterID, methodName, arg, 30)
-	if err != nil {
-		panic(err)
+	Index string `ic:"EnumIndex"`
+}
+
+func dealWithSubscribePool(agent *Agent, to string, expiration, preExecBlockNum, execBlockNum uint64, preExecEventIdx, execEventIdx uint, canisterId string) error {
+	//todo: check
+	methodName := "subscribe_pool"
+	arg, _ := idl.Encode([]idl.Type{
+		&idl.Text{}, //to
+		idl.Nat64(), //expiration
+		idl.Nat64(), //pre_exec_block_num
+		idl.Nat64(), //exec_block_num
+		idl.Nat32(), //pre_exec_event_idx
+		idl.Nat32(), //exec_event_idx
+	}, []interface{}{
+		to,
+		big.NewInt(int64(expiration)),
+		big.NewInt(int64(preExecBlockNum)),
+		big.NewInt(int64(execBlockNum)),
+		big.NewInt(int64(preExecEventIdx)),
+		big.NewInt(int64(execEventIdx)),
+	})
+	type resp struct {
+		Ok    *uint8  `ic:"Ok"`
+		Err   ICError `ic:"Err"`
+		Index string  `ic:"EnumIndex"`
 	}
+	_, result, err := agent.Update(canisterId, methodName, arg, 30)
+	if err != nil {
+		return err
+	}
+	var myresult resp
 	utils.Decode(&myresult, result[0])
+	if myresult.Index == "Ok" {
+		return nil
+	} else if myresult.Index == "Err" {
+		return fmt.Errorf("sub pool update error: " + myresult.Err.Index)
+	} else {
+		panic(myresult)
+	}
+}
 
-	// arg, _ := idl.Encode(argType, argValue)
-	// _, result, err := agent.Update(canisterID, methodName, arg)
-
-	t.Log("errMsg:", err, "result:", myresult)
+func TestAgent_UpdateRaw(t *testing.T) {
+	_agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
+	t.Log(_agent.Sender().Encode())
+	cid := "37u3s-baaaa-aaaak-qcj4q-cai"
+	t.Log(dealWithSubscribePool(_agent, "0x471543A3bd04486008c8a38c5C00543B73F1769e", math.MaxUint64, 9543388, 9543388, 0, 0, cid))
 }
 
 func TestAgent_GetCanisterModule(t *testing.T) {
@@ -238,13 +267,6 @@ func TestAgent_GetCanisterControllers(t *testing.T) {
 		}
 	}
 	t.Log(result)
-}
-
-func TestPrincipal(t *testing.T) {
-	pkBytes, _ := hex.DecodeString("833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	identity := identity.New(false, pkBytes)
-	p := principal.NewSelfAuthenticating(identity.PubKeyBytes())
-	t.Log(p.Encode(), len(identity.PubKeyBytes()))
 }
 
 func TestCbor(t *testing.T) {

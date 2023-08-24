@@ -1,7 +1,6 @@
 package agent
 
 import (
-	"encoding/hex"
 	"fmt"
 	"time"
 
@@ -13,33 +12,27 @@ import (
 
 type Agent struct {
 	client        *Client
-	identity      *identity.Identity
+	identity      identity.Identity
 	ingressExpiry time.Duration
 	rootKey       []byte //ICP root identity
 }
 
-func NewFromPem(anonymous bool, pemPath string) (*Agent, error) {
-	var id *identity.Identity
+func NewFromPem(anonymous bool, hex string) (*Agent, error) {
+	var id identity.Identity
+	var err error
 	c := NewClient("https://ic0.app")
 	//todo:是否需要从ic拉取rootKey信息
 	status, _ := c.Status()
 
 	if anonymous == true {
-		id = &identity.Identity{
-			Anonymous: anonymous,
+		id = identity.AnonymousIdentity{}
+	} else {
+		id, err = identity.NewSecp256k1IdentityFromHex(hex)
+		if err != nil {
+			return nil, err
 		}
 	}
-	privKey, err := identity.FromPem(pemPath)
-	if err != nil {
-		return nil, err
-	}
-	pubKey := privKey.Public()
 
-	id = &identity.Identity{
-		anonymous,
-		privKey,
-		pubKey,
-	}
 	ingressExpiry := time.Second * 10
 	return &Agent{
 		client:        &c,
@@ -50,11 +43,20 @@ func NewFromPem(anonymous bool, pemPath string) (*Agent, error) {
 }
 
 func New(anonymous bool, privKey string) *Agent {
+	var id identity.Identity
+	var err error
 	c := NewClient("https://ic0.app")
 	//todo:是否需要从ic拉取rootKey信息
 	status, _ := c.Status()
-	pbBytes, _ := hex.DecodeString(privKey)
-	id := identity.New(anonymous, pbBytes)
+
+	if anonymous == true {
+		id = identity.AnonymousIdentity{}
+	} else {
+		id, err = identity.NewSecp256k1IdentityFromHex(privKey)
+		if err != nil {
+			panic(err)
+		}
+	}
 
 	ingressExpiry := time.Second * 10
 	return &Agent{
@@ -66,11 +68,7 @@ func New(anonymous bool, privKey string) *Agent {
 }
 
 func (agent *Agent) Sender() principal.Principal {
-	if agent.identity.Anonymous == true {
-		return principal.AnonymousID
-	}
-	sender := principal.NewSelfAuthenticating(agent.identity.PubKeyBytes())
-	return sender
+	return agent.identity.Sender()
 }
 
 func (agent *Agent) getExpiryDate() time.Time {
@@ -262,13 +260,10 @@ func (agent *Agent) signRequest(req Request) (*RequestID, []byte, error) {
 	requestID := NewRequestID(req)
 	msg := []byte(IC_REQUEST_DOMAIN_SEPARATOR)
 	msg = append(msg, requestID[:]...)
-	sig, err := agent.identity.Sign(msg)
-	if err != nil {
-		return nil, nil, err
-	}
+	sig := agent.identity.Sign(msg)
 	envelope := Envelope{
 		Content:      req,
-		SenderPubkey: agent.identity.PubKeyBytes(),
+		SenderPubkey: agent.identity.PublicKey(),
 		SenderSig:    sig,
 	}
 
@@ -300,7 +295,7 @@ func (agent *Agent) GetCanisterModule(canisterID string) ([]byte, error) {
 	return agent.GetCanisterInfo(canisterID, "module_hash")
 }
 
-func (agent Agent) GetCanisterInfo(canisterID, subPath string) ([]byte, error) {
+func (agent *Agent) GetCanisterInfo(canisterID, subPath string) ([]byte, error) {
 	canisterBytes, err := principal.Decode(canisterID)
 	if err != nil {
 		return nil, err
@@ -314,7 +309,7 @@ func (agent Agent) GetCanisterInfo(canisterID, subPath string) ([]byte, error) {
 	return LookUp(path, cert)
 }
 
-func (agent Agent) GetCanisterTime(canisterID string) ([]byte, error) {
+func (agent *Agent) GetCanisterTime(canisterID string) ([]byte, error) {
 	paths := [][][]byte{{[]byte("time")}}
 	cert, err := agent.readStateRaw(canisterID, paths)
 	if err != nil {

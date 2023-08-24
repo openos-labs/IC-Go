@@ -65,7 +65,7 @@ func (c *Client) call(canisterId string, reqId RequestID, data []byte) (RequestI
 	if err != nil {
 		return reqId, err
 	}
-	if resp.StatusCode != 202 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		fmt.Println(resp)
 		return reqId, fmt.Errorf("fail to call ic with status: %v", resp.Status)
 	}
