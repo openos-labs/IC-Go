@@ -67,6 +67,10 @@ func New(anonymous bool, privKey string) *Agent {
 	}
 }
 
+func (agent *Agent) Identity() identity.Identity {
+	return agent.identity
+}
+
 func (agent *Agent) Sender() principal.Principal {
 	return agent.identity.Sender()
 }
