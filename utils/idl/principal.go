@@ -3,10 +3,10 @@ package idl
 import (
 	"bytes"
 	"fmt"
+	"github.com/openos-labs/IC-Go/utils/principal"
 	"math/big"
 
 	"github.com/aviate-labs/leb128"
-	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
 type Principal struct {

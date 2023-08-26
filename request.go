@@ -3,9 +3,9 @@ package agent
 import (
 	"bytes"
 	"crypto/sha256"
+	"github.com/openos-labs/IC-Go/utils/principal"
 
 	"github.com/aviate-labs/leb128"
-	"github.com/mix-labs/IC-Go/utils/principal"
 
 	"math/big"
 	"sort"
@@ -136,7 +136,7 @@ func NewRequestID(req Request) RequestID {
 		hashes = append(hashes, append(nonceKey[:], nonceHash[:]...))
 	}
 	if len(req.Paths) != 0 {
-		pathHash:= encodeList3D(req.Paths)
+		pathHash := encodeList3D(req.Paths)
 		hashes = append(hashes, append(pathKey[:], pathHash[:]...))
 	}
 	sort.Slice(hashes, func(i, j int) bool {
@@ -150,7 +150,8 @@ func encodeLEB128(i uint64) []byte {
 	e, _ := leb128.EncodeUnsigned(bi)
 	return e
 }
-//todo:之后用reflect写成一个函数
+
+// todo:之后用reflect写成一个函数
 func encodeList3D(lists [][][]byte) [32]byte {
 	var res []byte
 	for _, v := range lists {
@@ -168,6 +169,7 @@ func encodeList2D(lists [][]byte) [32]byte {
 	}
 	return sha256.Sum256(res)
 }
+
 type Envelope struct {
 	Content      Request `cbor:"content,omitempty"`
 	SenderPubkey []byte  `cbor:"sender_pubkey,omitempty"`

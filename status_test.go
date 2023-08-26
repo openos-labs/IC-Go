@@ -1,9 +1,8 @@
 package agent_test
 
 import (
+	agent "github.com/openos-labs/IC-Go"
 	"testing"
-
-	agent "github.com/mix-labs/IC-Go"
 )
 
 func TestClientStatus(t *testing.T) {

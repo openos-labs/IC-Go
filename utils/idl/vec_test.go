@@ -1,9 +1,8 @@
 package idl_test
 
 import (
+	"github.com/openos-labs/IC-Go/utils/idl"
 	"math/big"
-
-	"github.com/mix-labs/IC-Go/utils/idl"
 )
 
 func ExampleVec() {

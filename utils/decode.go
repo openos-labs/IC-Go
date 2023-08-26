@@ -1,14 +1,11 @@
 package utils
 
 import (
+	"github.com/openos-labs/IC-Go/utils/idl"
 	"math/big"
 	"reflect"
 	"unsafe"
-
-	"github.com/mix-labs/IC-Go/utils/idl"
 )
-
-
 
 func Decode(target interface{}, source interface{}) {
 	Type := reflect.TypeOf(target).Elem()
@@ -16,7 +13,7 @@ func Decode(target interface{}, source interface{}) {
 	_Decode(Value, Type, source)
 }
 
-func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
+func _Decode(target reflect.Value, targetType reflect.Type, source interface{}) {
 	if targetType.Kind() == reflect.Struct {
 		if targetType.Name() == "Int" {
 			value := source.(*big.Int)
@@ -24,35 +21,35 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 			ptarget.Set(value)
 			return
 		}
-		
+
 		sourceField := source.(map[string]interface{})
 
-		for k, v := range(sourceField) {
+		for k, v := range sourceField {
 			for i := 0; i < targetType.NumField(); i++ {
 				targetFiledType := targetType.Field(i)
-				
+
 				if idl.Hash(targetFiledType.Tag.Get("ic")).String() == k {
-					targetFiledValue := target.Elem().Field(i)		
+					targetFiledValue := target.Elem().Field(i)
 					_Decode(targetFiledValue.Addr(), targetFiledType.Type, v)
 					break
 				}
 
 				if targetFiledType.Tag.Get("ic") == k {
-					targetFiledValue := target.Elem().Field(i)	
+					targetFiledValue := target.Elem().Field(i)
 					if k == "EnumIndex" {
 						//to solve enum struct
 						for j := 0; j < targetType.NumField(); j++ {
 							labelFiledType := targetType.Field(j)
 							if idl.Hash(labelFiledType.Tag.Get("ic")).String() == v.(string) {
-								targetFiledValue.SetString(labelFiledType.Tag.Get("ic"))						
+								targetFiledValue.SetString(labelFiledType.Tag.Get("ic"))
 							}
 						}
 						continue
 					}
-						
+
 					_Decode(targetFiledValue.Addr(), targetFiledType.Type, v)
 				}
-			}		
+			}
 		}
 	} else if targetType.Kind() == reflect.String {
 		sourceFiled := source.(string)
@@ -74,13 +71,11 @@ func _Decode(target reflect.Value, targetType reflect.Type,source interface{}) {
 		sourceFiled := source.([]interface{})
 		var elem reflect.Value
 		Type := targetType.Elem()
-		for _, v := range(sourceFiled) {
+		for _, v := range sourceFiled {
 			elem = reflect.New(Type)
 			_Decode(elem, elem.Type().Elem(), v)
 			target.Elem().Set(reflect.Append(target.Elem(), elem.Elem()))
 		}
 	}
-
-
 
 }

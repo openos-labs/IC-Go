@@ -2,11 +2,10 @@ package idl_test
 
 import (
 	"fmt"
+	"github.com/openos-labs/IC-Go/utils/idl"
 	"math/big"
 	"reflect"
 	"testing"
-
-	"github.com/mix-labs/IC-Go/utils/idl"
 )
 
 func TestHash(t *testing.T) {

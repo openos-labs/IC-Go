@@ -3,32 +3,32 @@ package agent
 import (
 	"encoding/hex"
 	"fmt"
+	"github.com/openos-labs/IC-Go/utils"
+	"github.com/openos-labs/IC-Go/utils/identity"
+	"github.com/openos-labs/IC-Go/utils/idl"
+	"github.com/openos-labs/IC-Go/utils/principal"
 	"math/big"
 	"testing"
 
 	"github.com/fxamacker/cbor/v2"
-	"github.com/mix-labs/IC-Go/utils"
-	"github.com/mix-labs/IC-Go/utils/identity"
-	"github.com/mix-labs/IC-Go/utils/idl"
-	"github.com/mix-labs/IC-Go/utils/principal"
 )
 
-//EXT data structure
+// EXT data structure
 type supply struct {
-	Ok uint64 `ic:"ok"`
-	Err string	`ic:"err"`
+	Ok  uint64 `ic:"ok"`
+	Err string `ic:"err"`
 }
 type Time struct {
-	Some big.Int	`ic:"some"`
-	None uint8	`ic:"none"`
+	Some big.Int `ic:"some"`
+	None uint8   `ic:"none"`
 }
 type listing struct {
-	Locked Time `ic:locked`
-	Price uint64 `ic:"price"`
+	Locked Time                `ic:locked`
+	Price  uint64              `ic:"price"`
 	Seller principal.Principal `ic:"seller"`
 }
 type listingTuple struct {
-	A uint32 `ic:"0"`
+	A uint32  `ic:"0"`
 	B listing `ic:"1"`
 }
 type listings []listingTuple
@@ -36,29 +36,27 @@ type listings []listingTuple
 type TokenIndex uint32
 type RegistryTuple struct {
 	A TokenIndex `ic:"0"`
-	B string `ic:"1"`
+	B string     `ic:"1"`
 }
 type Registrys []RegistryTuple
 
-
-//PUNK data structure
+// PUNK data structure
 type principalOp struct {
 	Some principal.Principal `ic:"some"`
-	None uint8 `ic:"none"`
+	None uint8               `ic:"none"`
 }
 type priceOp struct {
 	Some uint64 `ic:"some"`
-	None uint8 `ic:"none"`
+	None uint8  `ic:"none"`
 }
-
 
 type NULL *uint8
 
-type Operation struct{
-	Delist NULL `ic:"delist"`
-	Init NULL	`ic:"init"`
-	List NULL	`ic:"list"`
-	Mint NULL  `ic:"mint"`
+type Operation struct {
+	Delist   NULL `ic:"delist"`
+	Init     NULL `ic:"init"`
+	List     NULL `ic:"list"`
+	Mint     NULL `ic:"mint"`
 	Purchase NULL `ic:"purchase"`
 	Transfer NULL `ic:"transfer"`
 
@@ -67,17 +65,15 @@ type Operation struct{
 }
 
 type transaction struct {
-	Caller principal.Principal `ic:"caller"`
-	To principalOp `ic:"to"`
-	From principalOp `ic:"from"`
-	Index big.Int `ic:"index"`
-	Price priceOp `ic:"price"`
-	Timestamp big.Int `ic:"timestamp"`
-	TokenId big.Int `ic:"tokenId"`
-	Op Operation `ic:"op"`
+	Caller    principal.Principal `ic:"caller"`
+	To        principalOp         `ic:"to"`
+	From      principalOp         `ic:"from"`
+	Index     big.Int             `ic:"index"`
+	Price     priceOp             `ic:"price"`
+	Timestamp big.Int             `ic:"timestamp"`
+	TokenId   big.Int             `ic:"tokenId"`
+	Op        Operation           `ic:"op"`
 }
-
-
 
 func TestAgent_QueryRaw(t *testing.T) {
 	//EXT canister
@@ -86,10 +82,9 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//PUNK canister
 	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
 
-
 	//agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	agent,err := NewFromPem(false,"./utils/identity/priv.pem")
-	if err != nil{
+	agent, err := NewFromPem(false, "./utils/identity/priv.pem")
+	if err != nil {
 		t.Log(err)
 	}
 	//EXT method
@@ -100,14 +95,13 @@ func TestAgent_QueryRaw(t *testing.T) {
 	//PUNK method
 	methodName := "getHistoryByIndex"
 
-
 	//arg, err := idl.Encode([]idl.Type{new(idl.Null)}, []interface{}{nil})
 	arg, err := idl.Encode([]idl.Type{new(idl.Nat)}, []interface{}{big.NewInt(10)})
 	if err != nil {
 		t.Error(err)
 	}
 	Type, result, errMsg, err := agent.QueryRaw(canisterID, methodName, arg)
-	
+
 	//myresult := supply{}
 	//myresult := listings{}
 	//myresult := Registrys{}
@@ -135,32 +129,29 @@ func TestAgent_UpdateRaw(t *testing.T) {
 	arg, _ := idl.Encode(argType, argValue)
 	_, result, err := agent.UpdateRaw(canisterID, methodName, arg)
 
-
-
-
 	t.Log("errMsg:", err, "result:", result[0])
 }
 
 func TestAgent_GetCanisterModule(t *testing.T) {
 	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	result,err := agent.GetCanisterModule(canisterID)
-	if err != nil{
-		t.Log("err:",err)
+	result, err := agent.GetCanisterModule(canisterID)
+	if err != nil {
+		t.Log("err:", err)
 	} else {
-		t.Log("hash:",hex.EncodeToString(result))
+		t.Log("hash:", hex.EncodeToString(result))
 	}
 }
 
 func TestAgent_GetCanisterControllers(t *testing.T) {
 	canisterID := "qfh5c-6aaaa-aaaah-qakeq-cai"
 	agent := New(false, "833fe62409237b9d62ec77587520911e9a759cec1d19755b7da901b96dca3d42")
-	result,err := agent.GetCanisterControllers(canisterID)
-	if err != nil{
-		t.Log("err:",err)
+	result, err := agent.GetCanisterControllers(canisterID)
+	if err != nil {
+		t.Log("err:", err)
 	} else {
-		for _,i := range result{
-			t.Log("controller:",i.Encode())
+		for _, i := range result {
+			t.Log("controller:", i.Encode())
 		}
 	}
 }

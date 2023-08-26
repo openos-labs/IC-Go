@@ -4,9 +4,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	agent "github.com/openos-labs/IC-Go"
 	"testing"
-
-	agent "github.com/mix-labs/IC-Go"
 )
 
 func TestNewRequestID(t *testing.T) {
@@ -38,7 +37,7 @@ func TestEncodeRequestID(t *testing.T) {
 }
 
 func TestEncodeList(t *testing.T) {
-	a := [][]byte{[]byte("i"),[]byte("love"),[]byte("you")}
+	a := [][]byte{[]byte("i"), []byte("love"), []byte("you")}
 	res := encodeList(a)
 	t.Log(hex.EncodeToString([]byte("i")))
 	t.Log(hex.EncodeToString([]byte("love")))
